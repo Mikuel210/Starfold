@@ -10,7 +10,7 @@ class Control {
     Control(IHardwareProvider& hardwareProvider_) : hardwareProvider(hardwareProvider_) {}
 
     void update(FusionData data) {
-      plot(xPID.getCorrection(data.orientation.x));
+      Plotter::plot(xPID.getCorrection(data.orientation.x));
     }
 
   private:
