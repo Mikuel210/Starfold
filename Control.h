@@ -16,7 +16,7 @@ class Control {
   private:
     IHardwareProvider& hardwareProvider;
 
-    PID xPID = PID(1, 1, 1);
-    PID yPID = PID(1, 1, 1);
-    PID zPID = PID(1, 1, 1);
+    PID xPID = PID(1, 0.5f, 2);
+    PID yPID = PID(1, 0, 1);
+    PID zPID = PID(1, 0, 1);
 };
