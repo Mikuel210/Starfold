@@ -1,10 +1,12 @@
 #pragma once
 #include "Plotter.h"
 
+#define INTEGRAL_LIMIT 10.0f
+#define INTEGRAL_RATE 1.0f
+
 class PID {
   public:
     float Kp, Ki, Kd, setpoint;
-    float integralLimit = 5;
 
     PID(float Kp_, float Ki_, float Kd_, float setpoint_ = 0) : Kp(Kp_), Ki(Ki_), Kd(Kd_), setpoint(setpoint_) {}
 
@@ -13,11 +15,11 @@ class PID {
       unsigned long elapsedTime = currentTime - previousTime;
       
       float error = setpoint - input;
-      errorIntegral += error * elapsedTime / 1000000;
+      errorIntegral += error * elapsedTime / 1000000 * INTEGRAL_RATE;
       float errorRate = (error - lastError) / elapsedTime * 100000;
 
-      if (fabs(errorIntegral) > fabs(integralLimit))
-        errorIntegral = (errorIntegral > 0 ? 1 : -1) * fabs(integralLimit);
+      if (fabs(errorIntegral) > INTEGRAL_LIMIT)
+        errorIntegral = (errorIntegral > 0 ? 1 : -1) * INTEGRAL_LIMIT;
 
       if ((error * errorIntegral) < 0)
         errorIntegral = 0;

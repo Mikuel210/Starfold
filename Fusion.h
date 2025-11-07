@@ -17,8 +17,8 @@ class Fusion {
       );
 
       fusionData.orientation.x = fusion.getPitch();
-      fusionData.orientation.y = fusion.getRoll(); // Y up
-      fusionData.orientation.z = fusion.getYaw(); 
+      fusionData.orientation.y = fusion.getYaw();
+      fusionData.orientation.z = fusion.getRoll(); // Z up
 
       // TODO: Fuse altitude
       fusionData.altitude = sensorData.distance;

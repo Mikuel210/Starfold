@@ -6,9 +6,8 @@
 
 SensorDataProvider dataProvider;
 FlightHardwareProvider hardwareProvider;
-Fusion fusion;
 Control control = Control(hardwareProvider);
-               
+Fusion fusion;
 
 void setup() {
   Serial.begin(250000);
