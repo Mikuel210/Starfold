@@ -13,17 +13,17 @@ class Fusion {
       FusionData fusionData;
       deltat = fusion.deltatUpdate();
 
-      fusion.MadgwickUpdate(
+      fusion.MahonyUpdate(
         sensorData.gyroscope.x, sensorData.gyroscope.y, sensorData.gyroscope.z, 
         sensorData.acceleration.x, sensorData.acceleration.y, sensorData.acceleration.z, 
-        sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, deltat
+        sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, 
+        deltat
       );
 
+      // Z up
       fusionData.orientation.x = fusion.getPitch();
-      fusionData.orientation.y = fusion.getYaw();
-      fusionData.orientation.z = fusion.getRoll(); // Z up
-
-      Plotter::plot();
+      fusionData.orientation.y = fusion.getRoll();
+      fusionData.orientation.z = fusion.getYaw();
 
       // TODO: Fuse altitude with accelerometer, LiDAR and angle
       fusionData.altitude = previousAltitude + LIDAR_ALPHA * (sensorData.distance - previousAltitude);

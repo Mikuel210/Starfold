@@ -1,11 +1,14 @@
 #pragma once
 #include "IDataProvider.h"
-#include "mpu9250.h"
+#include "Plotter.h"
 #include <Arduino.h>
 #include <Wire.h>
 #include <TFLI2C.h>
+#include <FastIMU.h>
 
-#define CALIBRATION_SAMPLES 100
+#define IMU_ADDRESS 0x68
+#define G -9.807f
+#define DEG2RAD 0.01745329251f
 
 class SensorDataProvider : public IDataProvider {
   public:
@@ -13,12 +16,19 @@ class SensorDataProvider : public IDataProvider {
       // Initialize IMU and LiDAR
       Wire.begin();
       Wire.setClock(400000);
-      imu.Config(&Wire, bfs::Mpu9250::I2C_ADDR_PRIM);
 
-      if (!imu.Begin()) { Serial.println("Error initializing communication with IMU"); }
-      if (!imu.ConfigSrd(19)) { Serial.println("Error configuring IMU SRD"); }
+      IMU.setIMUGeometry(7);
+      int error = IMU.init({ 0 }, IMU_ADDRESS);
+
+      if (error != 0) {
+        Serial.print("Error initializing IMU: ");
+        Serial.println(error);
+        while (true) {}
+      }
 
       // Calibration
+      // TODO: Update using FastIMU example https://github.com/LiquidCGS/FastIMU/blob/main/examples/Calibrated_sensor_output/Calibrated_sensor_output.ino
+      /* 
       Serial.println("Calibrating IMU");
 
       for (int i = 0; i < CALIBRATION_SAMPLES; i++)
@@ -39,19 +49,16 @@ class SensorDataProvider : public IDataProvider {
       gyroscopeOffset.x /= CALIBRATION_SAMPLES;
       gyroscopeOffset.y /= CALIBRATION_SAMPLES;
       gyroscopeOffset.z /= CALIBRATION_SAMPLES;
+      */
     }
 
     SensorData getData() override {
       SensorData data;
+      IMU.update();
 
-      if (imu.Read()) {
-        /*imu.new_imu_data();
-        imu.new_mag_data();*/
-
-        data.acceleration = readAccelerometer();
-        data.gyroscope = readGyroscope();
-        data.magnetometer = readMagnetometer();
-      }
+      data.acceleration = readAccelerometer();
+      data.gyroscope = readGyroscope();
+      data.magnetometer = readMagnetometer();
       
       if (tfI2C.getData(tfDistance, tfAddress))
         data.distance = tfDistance;
@@ -63,32 +70,37 @@ class SensorDataProvider : public IDataProvider {
 
   private:
     // Orientation
-    bfs::Mpu9250 imu;
-    Vector3 gyroscopeOffset; // Consider accelerometer offset as well
+    MPU9250 IMU;
+    AccelData accelData;
+    GyroData gyroData;
+    MagData magData;
 
     Vector3 readAccelerometer() { 
       Vector3 acceleration;
-      acceleration.x = imu.accel_x_mps2();
-      acceleration.y = imu.accel_y_mps2();
-      acceleration.z = imu.accel_z_mps2();
+      IMU.getAccel(&accelData);
+      acceleration.x = accelData.accelX * G;
+      acceleration.y = accelData.accelY * G;
+      acceleration.z = accelData.accelZ * G;
 
       return acceleration;
     }
 
     Vector3 readGyroscope() { 
       Vector3 gyroscope;
-      gyroscope.x = imu.gyro_x_radps() - gyroscopeOffset.x;
-      gyroscope.y = imu.gyro_y_radps() - gyroscopeOffset.y;
-      gyroscope.z = imu.gyro_z_radps() - gyroscopeOffset.z;
+      IMU.getGyro(&gyroData);
+      gyroscope.x = gyroData.gyroX * DEG2RAD;
+      gyroscope.y = gyroData.gyroY * DEG2RAD;
+      gyroscope.z = gyroData.gyroZ * DEG2RAD;
 
       return gyroscope;
     }
 
     Vector3 readMagnetometer() { 
       Vector3 magnetometer;
-      magnetometer.x = imu.mag_x_ut();
-      magnetometer.y = imu.mag_y_ut();
-      magnetometer.z = imu.mag_z_ut();
+      IMU.getMag(&magData);
+      magnetometer.x = magData.magX;
+      magnetometer.y = magData.magY;
+      magnetometer.z = magData.magZ;
 
       return magnetometer;
     }

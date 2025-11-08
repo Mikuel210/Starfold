@@ -30,11 +30,13 @@ class FlightHardwareProvider : public IHardwareProvider {
     }
 
     void applyCorrection(Vector3 correction) {
-      int angle = 0; // Vertical
+      int angle = 90; // Vertical
       XPlus.write(correction.x + correction.z + angle);
       XMinus.write(-correction.x + correction.z + angle);
       YPlus.write(correction.y + correction.z + angle);
       YMinus.write(-correction.y + correction.z + angle);
+
+      Serial.print("   "); Plotter::plot(correction.x + correction.z + angle);
     }
 
     void throttleMotors(int throttle) {

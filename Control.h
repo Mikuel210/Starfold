@@ -7,7 +7,7 @@
 
 // TVC
 #define KP 1
-#define KI 0
+#define KI 0.25f
 #define KD 2
 
 // Altitude
