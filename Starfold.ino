@@ -22,7 +22,7 @@ void loop() {
   SensorData sensorData = dataProvider.getData();
   FusionData fusionData = fusion.getData(sensorData);
   
-  control.update(fusionData); // i should go outside
+  control.update(fusionData);
   Plotter::plot(fusionData.orientation.x);
   Plotter::plot(fusionData.orientation.y);
   Plotter::plot(fusionData.orientation.z);

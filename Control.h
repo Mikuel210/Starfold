@@ -3,6 +3,7 @@
 #include "IHardwareProvider.h"
 #include "FusionData.h"
 #include "PID.h"
+#include "Plotter.h"
 #include <algorithm>
 
 // TVC
@@ -26,7 +27,7 @@ class Control {
       Vector3 correction;
       correction.x = xPID.getCorrection(data.orientation.x);
       correction.y = yPID.getCorrection(data.orientation.y);
-      correction.z = zPID.getCorrection(data.orientation.z);
+      correction.z = getRollRate(data.orientation.z) * KD;
 
       hardwareProvider.applyCorrection(correction);
 
@@ -38,9 +39,28 @@ class Control {
 
   private:
     IHardwareProvider& hardwareProvider;
+    float previousRoll, previousTime;
 
     PID xPID = PID(KP, KI, KD);
     PID yPID = PID(KP, KI, KD);
-    PID zPID = PID(0, 0, KD);
     PID altitudePID = PID(AKP, AKI, AKD, 5, 0.1f);
+
+    float getRollRate(float roll) {
+      unsigned long currentTime = micros();
+
+      // Get rate with 360 to 0 warping
+      float rate = fmodf(roll - previousRoll + 540.0f, 360.0f);
+      if (rate < 0) rate += 360.0f;
+      rate -= 180.0f;
+
+      rate /= previousTime - currentTime;
+      rate *= 100000; // Micros to seconds
+
+      Serial.print("   "); Plotter::plot(rate); Serial.print("   ");
+
+      previousRoll = roll;
+      previousTime = currentTime;
+
+      return rate;
+    }
 };
