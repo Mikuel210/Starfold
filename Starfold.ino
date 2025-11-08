@@ -46,6 +46,11 @@ void loop() {
   switch (currentState) {
     case IDLE:
       hardwareProvider.lightLed(0, 0, 255);
+
+      // Reset state
+      hardwareProvider.deployLegs(false);
+      control.shutdown();
+      
       delay(3000);
 
       startupStartMillis = millis();
@@ -58,7 +63,7 @@ void loop() {
       unsigned long elapsed = millis() - startupStartMillis;
       long timeLeft = STARTUP_SECONDS * 1000 - elapsed;
 
-      dataProvider.calibrate(); // TODO
+      dataProvider.calibrate();
       hardwareProvider.updateWiggle(timeLeft);
       hardwareProvider.updateCountdown(timeLeft);
 
@@ -79,10 +84,15 @@ void loop() {
       hardwareProvider.lightLed(150, 0, 150);
       unsigned long elapsed = millis() - flightStartMillis;
 
-      // Set target altitude
-      if (elapsed < THROTTLE_UP_SECONDS * 1000) control.targetAltitude(0);
-      else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) control.targetAltitude(LANDING_ALTITUDE);
-      else control.targetAltitude(HOVER_ALTITUDE);
+      // Set altitude and deploy legs
+      if (elapsed < THROTTLE_UP_SECONDS * 1000) {
+        control.targetAltitude(0);
+      } else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) {
+        control.targetAltitude(LANDING_ALTITUDE);
+        hardwareProvider.deployLegs();
+      } else {
+        control.targetAltitude(HOVER_ALTITUDE);
+      }
 
       // Update control system
       SensorData sensorData = dataProvider.getData();

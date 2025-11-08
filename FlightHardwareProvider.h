@@ -57,8 +57,8 @@ class FlightHardwareProvider : public IHardwareProvider {
       int microseconds = (int)(throttlePercentage * 10 + 1000);
       microseconds = std::clamp(microseconds, 1000, 2000);
 
-      // Esc.writeMicroseconds(microseconds);
-      Leg.write(map(microseconds, 1000, 2000, 0, 180));
+      Esc.writeMicroseconds(microseconds);
+      // Leg.write(map(microseconds, 1000, 2000, 0, 180));
     }
 
     void deployLegs(bool deploy = true) override {
