@@ -14,6 +14,8 @@
 #define X_MINUS 25
 #define Y_PLUS 33
 #define Y_MINUS 32
+
+#define ESC 18
 #define LEG 4
 
 class FlightHardwareProvider : public IHardwareProvider {
@@ -28,6 +30,8 @@ class FlightHardwareProvider : public IHardwareProvider {
       XMinus.attach(X_MINUS);
       YPlus.attach(Y_PLUS);
       YMinus.attach(Y_MINUS);
+
+      Esc.attach(ESC);
       Leg.attach(LEG);
     }
 
@@ -38,8 +42,12 @@ class FlightHardwareProvider : public IHardwareProvider {
       YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
     }
 
-    void throttleMotors(int throttle) {
-      // TODO
+    void throttleMotors(float throttlePercentage) {
+      int microseconds = (int)(throttlePercentage * 10 + 1000);
+      microseconds = std::clamp(microseconds, 1000, 2000);
+
+      // Esc.writeMicroseconds(microseconds);
+      Leg.write(map(microseconds, 1000, 2000, 0, 180));
     }
 
     void deployLegs(bool deploy = true) override {
@@ -65,5 +73,7 @@ class FlightHardwareProvider : public IHardwareProvider {
     Servo XMinus;
     Servo YPlus;
     Servo YMinus;
+    
+    Servo Esc;
     Servo Leg;
 };

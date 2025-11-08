@@ -16,8 +16,7 @@ class Fusion {
       fusion.MahonyUpdate(
         sensorData.gyroscope.x, sensorData.gyroscope.y, sensorData.gyroscope.z, 
         sensorData.acceleration.x, sensorData.acceleration.y, sensorData.acceleration.z, 
-        sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, 
-        deltat
+        sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, deltat
       );
 
       // Z up

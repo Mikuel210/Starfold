@@ -7,7 +7,7 @@ class IHardwareProvider {
     virtual void initialize() {}
 
     virtual void applyCorrection(Vector3 correction) {}
-    virtual void throttleMotors(int throttle) {}
+    virtual void throttleMotors(float throttlePercentage) {}
     virtual void deployLegs(bool deploy = true) {}
     
     virtual void lightLed(int r, int g, int b) {}

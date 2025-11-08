@@ -3,7 +3,6 @@
 #include "IHardwareProvider.h"
 #include "FusionData.h"
 #include "PID.h"
-#include "Plotter.h"
 #include <algorithm>
 
 // TVC
@@ -16,25 +15,26 @@
 #define AKI 0.25f
 #define AKD 50
 
-#define MIN_THROTTLE 50
-#define MAX_THROTTLE 230
+#define MIN_THROTTLE 20.0f
+#define MAX_THROTTLE 90.0f
 
 class Control {
   public:
     Control(IHardwareProvider& hardwareProvider_) : hardwareProvider(hardwareProvider_) {}
 
     void update(FusionData data) {
+      // TVC
       Vector3 correction;
       correction.x = xPID.getCorrection(data.orientation.x);
       correction.y = yPID.getCorrection(data.orientation.y);
       correction.z = getRollRate(data.orientation.z) * KD;
-
       hardwareProvider.applyCorrection(correction);
 
+      // Throttle
       float altitudeCorrection = altitudePID.getCorrection(data.altitude);
-      int throttle = map(altitudeCorrection, -100, 100, MIN_THROTTLE, MAX_THROTTLE);
-      throttle = std::clamp(throttle, MIN_THROTTLE, MAX_THROTTLE);
-      hardwareProvider.throttleMotors(throttle);
+      float throttlePercentage = fmap(altitudeCorrection, -100, 100, MIN_THROTTLE, MAX_THROTTLE);
+      throttlePercentage = std::clamp(throttlePercentage, MIN_THROTTLE, MAX_THROTTLE);
+      hardwareProvider.throttleMotors(throttlePercentage);
     }
 
   private:
@@ -56,11 +56,13 @@ class Control {
       rate /= previousTime - currentTime;
       rate *= 100000; // Micros to seconds
 
-      Serial.print("   "); Plotter::plot(rate); Serial.print("   ");
-
       previousRoll = roll;
       previousTime = currentTime;
 
       return rate;
+    }
+
+    float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
+      return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 };
