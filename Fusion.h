@@ -20,12 +20,16 @@ class Fusion {
       fusionData.orientation.y = fusion.getYaw();
       fusionData.orientation.z = fusion.getRoll(); // Z up
 
-      // TODO: Fuse altitude
-      fusionData.altitude = sensorData.distance;
+      // TODO: Fuse altitude with accelerometer, LiDAR and angle
+      fusionData.altitude = previousAltitude + 0.2f * (sensorData.distance - previousAltitude);
+      previousAltitude = fusionData.altitude;
+
       return fusionData;
     }
 
   private:
     float deltat;
     SF fusion;
+
+    float previousAltitude;
 };

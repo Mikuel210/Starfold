@@ -1,14 +1,14 @@
-#pragma once
-#include "Plotter.h"
+#pragma onces
 
 #define INTEGRAL_LIMIT 10.0f
 #define INTEGRAL_RATE 1.0f
 
 class PID {
   public:
-    float Kp, Ki, Kd, setpoint;
+    float Kp, Ki, Kd, setpoint, alpha;
 
-    PID(float Kp_, float Ki_, float Kd_, float setpoint_ = 0) : Kp(Kp_), Ki(Ki_), Kd(Kd_), setpoint(setpoint_) {}
+    PID(float Kp_, float Ki_, float Kd_, float setpoint_ = 0, float alpha_ = 1) 
+      : Kp(Kp_), Ki(Ki_), Kd(Kd_), setpoint(setpoint_), alpha(alpha_) {}
 
     float getCorrection(float input) {
       unsigned long currentTime = micros();
@@ -24,14 +24,16 @@ class PID {
       if ((error * errorIntegral) < 0)
         errorIntegral = 0;
 
-      Plotter::plot(errorIntegral);
+      float output = Kp * error + Ki * errorIntegral + Kd * errorRate;
+      output = previousOutput + alpha * (output - previousOutput);
+      previousOutput = output;
 
       lastError = error;
       previousTime = currentTime;
 
-      return Kp * error + Ki * errorIntegral + Kd * errorRate;
+      return output;
     }
 
   private:
-    float lastError, errorIntegral, previousTime;
+    float lastError, errorIntegral, previousTime, previousOutput;
 };
