@@ -55,16 +55,19 @@ void loop() {
 
     case STARTUP: {
       hardwareProvider.lightLed(0, 150, 150);
+      unsigned long elapsed = millis() - startupStartMillis;
+      long timeLeft = STARTUP_SECONDS * 1000 - elapsed;
 
       dataProvider.calibrate(); // TODO
-
-      // TODO: TVC wiggle
+      hardwareProvider.updateWiggle(timeLeft);
+      hardwareProvider.updateCountdown(timeLeft);
 
       // Stabilize angle
       SensorData sensorData = dataProvider.getData();
       FusionData fusionData = fusion.getData(sensorData);
 
-      if (millis() - startupStartMillis > STARTUP_SECONDS * 1000) {
+      if (timeLeft <= 0) {
+        hardwareProvider.stopBuzzer();
         flightStartMillis = millis();
         currentState = FLIGHT;
       }

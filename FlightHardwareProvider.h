@@ -4,11 +4,7 @@
 #include <ESP32Servo.h>
 #include <algorithm>
 
-#define LED_R 2
-#define LED_G 19
-#define LED_B 23
-#define BUZZER 27
-
+// Actuators
 #define TVC_LIMIT 45.0f
 #define X_PLUS 26
 #define X_MINUS 25
@@ -17,6 +13,15 @@
 
 #define ESC 18
 #define LEG 4
+
+// State indication
+#define COUNTDOWN_FREQUENCY 220
+#define COUNTDOWN_BEEP_SECONDS 0.5f
+
+#define LED_R 2
+#define LED_G 19
+#define LED_B 23
+#define BUZZER 27
 
 class FlightHardwareProvider : public IHardwareProvider {
   public:
@@ -35,14 +40,14 @@ class FlightHardwareProvider : public IHardwareProvider {
       Leg.attach(LEG);
     }
 
-    void applyCorrection(Vector3 correction) {
+    void applyCorrection(Vector3 correction) override {
       XPlus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
       XMinus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
       YPlus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
       YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
     }
 
-    void throttleMotors(float throttlePercentage) {
+    void throttleMotors(float throttlePercentage) override {
       int microseconds = (int)(throttlePercentage * 10 + 1000);
       microseconds = std::clamp(microseconds, 1000, 2000);
 
@@ -53,6 +58,22 @@ class FlightHardwareProvider : public IHardwareProvider {
     void deployLegs(bool deploy = true) override {
       Leg.write(deploy ? 0 : 90);
     }
+
+    
+    void updateWiggle(unsigned long timeLeftMillis) override {
+      // TODO
+      // bambulab sound <3
+    }
+
+    void updateCountdown(unsigned long timeLeftMillis) override {
+      if (timeLeftMillis > 10'000) return; // Start at T-10 i thinkmaybe
+
+      if (timeLeftMillis % 1000 < COUNTDOWN_BEEP_SECONDS * 1000.0f)
+        toneBuzzer(COUNTDOWN_FREQUENCY);
+      else
+        stopBuzzer();
+    }
+
 
     void lightLed(int r, int g, int b) override {
       analogWrite(LED_R, r);

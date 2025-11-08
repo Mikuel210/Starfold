@@ -10,6 +10,9 @@ class IHardwareProvider {
     virtual void throttleMotors(float throttlePercentage) {}
     virtual void deployLegs(bool deploy = true) {}
     
+    virtual void updateWiggle(unsigned long timeLeftMillis) {}
+    virtual void updateCountdown(unsigned long timeLeftMillis) {}
+    
     virtual void lightLed(int r, int g, int b) {}
     virtual void toneBuzzer(float frequency) {}
     virtual void stopBuzzer() {}
