@@ -25,6 +25,10 @@ class Fusion {
       fusionData.orientation.y = fusion.getRoll();
       fusionData.orientation.z = fusion.getYaw();
 
+      // Make 0 = upright
+      if (fusionData.orientation.y > 0) fusionData.orientation.y -= 180;
+      else fusionData.orientation.y += 180;
+
       // TODO: Fuse altitude with accelerometer, LiDAR and angle
       fusionData.altitude = previousAltitude + LIDAR_ALPHA * (sensorData.distance - previousAltitude);
       previousAltitude = fusionData.altitude;

@@ -2,12 +2,14 @@
 #include "IHardwareProvider.h"
 #include "Plotter.h"
 #include <ESP32Servo.h>
+#include <algorithm>
 
 #define LED_R 2
 #define LED_G 19
 #define LED_B 23
 #define BUZZER 27
 
+#define TVC_LIMIT 45.0f
 #define X_PLUS 26
 #define X_MINUS 25
 #define Y_PLUS 33
@@ -30,13 +32,10 @@ class FlightHardwareProvider : public IHardwareProvider {
     }
 
     void applyCorrection(Vector3 correction) {
-      int angle = 90; // Vertical
-      XPlus.write(correction.x + correction.z + angle);
-      XMinus.write(-correction.x + correction.z + angle);
-      YPlus.write(correction.y + correction.z + angle);
-      YMinus.write(-correction.y + correction.z + angle);
-
-      Serial.print("   "); Plotter::plot(correction.x + correction.z + angle);
+      XPlus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+      XMinus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+      YPlus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+      YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
     }
 
     void throttleMotors(int throttle) {
