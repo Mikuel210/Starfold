@@ -22,6 +22,14 @@ class Control {
   public:
     Control(IHardwareProvider& hardwareProvider_) : hardwareProvider(hardwareProvider_) {}
 
+    void targetAltitude(float altitude) {
+      altitudePID.setpoint = altitude;
+    }
+
+    void shutdown() {
+      hardwareProvider.throttleMotors(0);
+    }
+
     void update(FusionData data) {
       // TVC
       Vector3 correction;
