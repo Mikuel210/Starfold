@@ -29,7 +29,6 @@ class SensorDataProvider : public IDataProvider {
 
     void calibrate() override {
       // TODO: Update using FastIMU example https://github.com/LiquidCGS/FastIMU/blob/main/examples/Calibrated_sensor_output/Calibrated_sensor_output.ino
-      
     }
 
     SensorData getData() override {

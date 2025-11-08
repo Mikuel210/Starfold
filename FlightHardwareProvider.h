@@ -15,8 +15,14 @@
 #define LEG 4
 
 // State indication
+#define COUNDOWN_SECONDS 10
 #define COUNTDOWN_FREQUENCY 220
 #define COUNTDOWN_BEEP_SECONDS 0.5f
+
+#define WIGGLE_T_MINUS 15
+#define WIGGLE_ANGLE 45
+#define WIGGLE_STEP 0.15f
+#define WIGGLE_INTERVAL 0.5f
 
 #define LED_R 2
 #define LED_G 19
@@ -61,12 +67,27 @@ class FlightHardwareProvider : public IHardwareProvider {
 
     
     void updateWiggle(unsigned long timeLeftMillis) override {
-      // TODO
-      // bambulab sound <3
+      unsigned long wiggleStart = WIGGLE_T_MINUS * 1000;
+      if (timeLeftMillis > wiggleStart) return;
+
+      // Wiggle sequence
+      if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 11'000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 10'000 - WIGGLE_INTERVAL * 1000) wiggleStep(-WIGGLE_ANGLE);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 9000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 8000 - WIGGLE_INTERVAL * 1000) wiggleStep(WIGGLE_ANGLE);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 7000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 6000 - WIGGLE_INTERVAL * 1000) wiggleStep(-WIGGLE_ANGLE);
+
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 6000) wiggleStep(0);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 5000) wiggleStep(WIGGLE_ANGLE);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 4000) wiggleStep(0);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 3000) wiggleStep(-WIGGLE_ANGLE);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 2000) wiggleStep(0);
+      else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 1000) wiggleStep(WIGGLE_ANGLE);
     }
 
     void updateCountdown(unsigned long timeLeftMillis) override {
-      if (timeLeftMillis > 10'000) return; // Start at T-10 i thinkmaybe
+      if (timeLeftMillis > COUNDOWN_SECONDS * 1000) return;
 
       if (timeLeftMillis % 1000 < COUNTDOWN_BEEP_SECONDS * 1000.0f)
         toneBuzzer(COUNTDOWN_FREQUENCY);
@@ -97,4 +118,11 @@ class FlightHardwareProvider : public IHardwareProvider {
     
     Servo Esc;
     Servo Leg;
+
+    void wiggleStep(int angle) {
+      XPlus.write(90 + angle);
+      XMinus.write(90 + angle);
+      YPlus.write(90 + angle);
+      YMinus.write(90 + angle);
+    }
 };
