@@ -3,12 +3,11 @@
 #include "IHardwareProvider.h"
 #include "FusionData.h"
 #include "PID.h"
-#include "Plotter.h"
 #include <algorithm>
 
 // TVC
 #define KP 1
-#define KI 0.25f
+#define KI 0
 #define KD 2
 
 // Altitude
@@ -34,18 +33,14 @@ class Control {
       float altitudeCorrection = altitudePID.getCorrection(data.altitude);
       int throttle = map(altitudeCorrection, -100, 100, MIN_THROTTLE, MAX_THROTTLE);
       throttle = std::clamp(throttle, MIN_THROTTLE, MAX_THROTTLE);
-
-      Serial.print("    "); Plotter::plot(data.altitude);
-      Serial.print("    "); Plotter::plot(altitudeCorrection);
-      Serial.print("    "); Plotter::plot(throttle); Serial.print("    ");
       hardwareProvider.throttleMotors(throttle);
     }
 
   private:
     IHardwareProvider& hardwareProvider;
 
-    PID xPID = PID(KP, KI, KD, 0, 0.5f);
-    PID yPID = PID(KP, KI, KD, 0, 0.5f);
-    PID zPID = PID(0, 0, KD, 0, 0.5f);
+    PID xPID = PID(KP, KI, KD);
+    PID yPID = PID(KP, KI, KD);
+    PID zPID = PID(0, 0, KD);
     PID altitudePID = PID(AKP, AKI, AKD, 5, 0.1f);
 };

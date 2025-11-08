@@ -2,7 +2,10 @@
 #include "Vector3.h"
 #include "SensorData.h"
 #include "FusionData.h"
+#include "Plotter.h"
 #include <SensorFusion.h>
+
+#define LIDAR_ALPHA 0.2f
 
 class Fusion {
   public:
@@ -20,16 +23,16 @@ class Fusion {
       fusionData.orientation.y = fusion.getYaw();
       fusionData.orientation.z = fusion.getRoll(); // Z up
 
+      Plotter::plot();
+
       // TODO: Fuse altitude with accelerometer, LiDAR and angle
-      fusionData.altitude = previousAltitude + 0.2f * (sensorData.distance - previousAltitude);
+      fusionData.altitude = previousAltitude + LIDAR_ALPHA * (sensorData.distance - previousAltitude);
       previousAltitude = fusionData.altitude;
 
       return fusionData;
     }
 
   private:
-    float deltat;
+    float deltat, previousAltitude;
     SF fusion;
-
-    float previousAltitude;
 };

@@ -45,8 +45,8 @@ class SensorDataProvider : public IDataProvider {
       SensorData data;
 
       if (imu.Read()) {
-        imu.new_imu_data();
-        imu.new_mag_data();
+        /*imu.new_imu_data();
+        imu.new_mag_data();*/
 
         data.acceleration = readAccelerometer();
         data.gyroscope = readGyroscope();

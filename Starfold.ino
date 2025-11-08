@@ -23,7 +23,9 @@ void loop() {
   FusionData fusionData = fusion.getData(sensorData);
   
   control.update(fusionData);
-  Plotter::plot(fusionData.orientation.x);
+  /*Plotter::plot(fusionData.orientation.x); // at -90 both ways are less negative
+  Plotter::plot(fusionData.orientation.y); // Y goes up Z goes down or vice versa for X rotation
+  Plotter::plot(fusionData.orientation.z);*/
   Plotter::endPlot();
 
   unsigned long usEnd = micros();

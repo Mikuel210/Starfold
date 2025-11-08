@@ -30,10 +30,11 @@ class FlightHardwareProvider : public IHardwareProvider {
     }
 
     void applyCorrection(Vector3 correction) {
-      XPlus.write(correction.x + correction.z + 90);
-      XMinus.write(-correction.x + correction.z + 90);
-      YPlus.write(correction.y + correction.z + 90);
-      YMinus.write(-correction.y + correction.z + 90);
+      int angle = 0; // Vertical
+      XPlus.write(correction.x + correction.z + angle);
+      XMinus.write(-correction.x + correction.z + angle);
+      YPlus.write(correction.y + correction.z + angle);
+      YMinus.write(-correction.y + correction.z + angle);
     }
 
     void throttleMotors(int throttle) {
