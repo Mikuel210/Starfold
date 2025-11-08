@@ -10,6 +10,9 @@
 #define HOVER_SECONDS 10
 #define THROTTLE_UP_SECONDS 1
 
+#define ABORT_THRESHOLD 45
+#define STARTUP_SECONDS 20
+
 // Instances
 SensorDataProvider dataProvider;
 FlightHardwareProvider hardwareProvider;
@@ -26,10 +29,11 @@ enum State {
 };
 
 enum State currentState = IDLE;
-
-// Flight
+unsigned long startupStartMillis;
 unsigned long flightStartMillis;
 
+
+// Entry point
 void setup() {
   Serial.begin(250000);
   dataProvider.initialize();
@@ -43,18 +47,30 @@ void loop() {
     case IDLE:
       hardwareProvider.lightLed(0, 0, 255);
       delay(3000);
+
+      startupStartMillis = millis();
       currentState = STARTUP;
 
       break;
 
-    case STARTUP:
-      hardwareProvider.lightLed(0, 255, 0);
-      delay(3000);
+    case STARTUP: {
+      hardwareProvider.lightLed(0, 150, 150);
 
-      flightStartMillis = millis();
-      currentState = FLIGHT;
+      dataProvider.calibrate(); // TODO
+
+      // TODO: TVC wiggle
+
+      // Stabilize angle
+      SensorData sensorData = dataProvider.getData();
+      FusionData fusionData = fusion.getData(sensorData);
+
+      if (millis() - startupStartMillis > STARTUP_SECONDS * 1000) {
+        flightStartMillis = millis();
+        currentState = FLIGHT;
+      }
 
       break;
+    }
 
     case FLIGHT: {
       hardwareProvider.lightLed(150, 0, 150);
@@ -73,6 +89,10 @@ void loop() {
       // Check for landing
       if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000 && fusionData.altitude <= LANDING_ALTITUDE + 1)
         currentState = LANDED;
+
+      // Check abort
+      if (fabs(fusionData.orientation.x) > ABORT_THRESHOLD || fabs(fusionData.orientation.y) > ABORT_THRESHOLD)
+        currentState = ABORT;
       
       // Debug
       Plotter::setLimits(-360, 360);
@@ -97,7 +117,7 @@ void loop() {
       break;
 
     case LANDED:
-      hardwareProvider.lightLed(150, 150, 0);
+      hardwareProvider.lightLed(0, 255, 0);
       control.shutdown();
 
       break;

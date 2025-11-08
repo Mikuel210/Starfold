@@ -28,6 +28,7 @@ class Control {
 
     void shutdown() {
       hardwareProvider.throttleMotors(0);
+      hardwareProvider.applyCorrection(Vector3(0, 0, 0));
     }
 
     void update(FusionData data) {

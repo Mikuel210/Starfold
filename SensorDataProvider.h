@@ -25,31 +25,10 @@ class SensorDataProvider : public IDataProvider {
         Serial.println(error);
         while (true) {}
       }
+    }
 
-      // Calibration
+    void calibrate() override {
       // TODO: Update using FastIMU example https://github.com/LiquidCGS/FastIMU/blob/main/examples/Calibrated_sensor_output/Calibrated_sensor_output.ino
-      /* 
-      Serial.println("Calibrating IMU");
-
-      for (int i = 0; i < CALIBRATION_SAMPLES; i++)
-      {
-        if (imu.Read())
-        {
-          imu.new_imu_data();
-          imu.new_mag_data();
-
-          gyroscopeOffset.x += imu.gyro_x_radps();
-          gyroscopeOffset.y += imu.gyro_y_radps();
-          gyroscopeOffset.z += imu.gyro_z_radps();
-        }
-
-        delay(50);
-      }
-
-      gyroscopeOffset.x /= CALIBRATION_SAMPLES;
-      gyroscopeOffset.y /= CALIBRATION_SAMPLES;
-      gyroscopeOffset.z /= CALIBRATION_SAMPLES;
-      */
     }
 
     SensorData getData() override {
