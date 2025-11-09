@@ -89,7 +89,7 @@ class FlightHardwareProvider : public IHardwareProvider {
     void updateCountdown(unsigned long timeLeftMillis) override {
       if (timeLeftMillis > COUNDOWN_SECONDS * 1000) return;
 
-      if (timeLeftMillis % 1000 < COUNTDOWN_BEEP_SECONDS * 1000.0f)
+      if (timeLeftMillis % 1000 > COUNTDOWN_BEEP_SECONDS * 1000.0f)
         toneBuzzer(COUNTDOWN_FREQUENCY);
       else
         stopBuzzer();

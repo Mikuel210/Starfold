@@ -35,7 +35,7 @@ unsigned long flightStartMillis;
 
 // Entry point
 void setup() {
-  Serial.begin(250000);
+  Serial.begin(115200);
   dataProvider.initialize();
   hardwareProvider.initialize();
 }
