@@ -1,4 +1,8 @@
-# Starfold
+<p align="center">
+
+  <img src="https://raw.githubusercontent.com/Mikuel210/Starfold/refs/heads/main/Images/Starfold.png" />
+
+</p>
 
 **Starfold is the flight software for [Starkit](https://github.com/Mikuel210/Starkit).**
 
@@ -6,7 +10,9 @@ Starkit is an electric model rocket designed for propulsive landings. Starkit is
 
 Starfold is the software that will make that possible.
 
-![](https://raw.githubusercontent.com/Mikuel210/Starkit/refs/heads/main/Images/39.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Mikuel210/Starkit/refs/heads/main/Images/39.png" />
+</p>
 
 _Starkit CAD model_
 
