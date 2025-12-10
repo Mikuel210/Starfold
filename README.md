@@ -16,6 +16,16 @@ Starfold is the software that will make that possible.
 
 _Starkit CAD model_
 
+## How it works
+
+- Starkit can detect its orientation and altitude using an IMU and a LiDAR
+- Using PID algorithms, the microcontroller generates corrections to the thrust of the motors and the orientation of the TVC vanes, which control the steering of the rocket
+- Having different setpoints of the PID algorithms in time means different flight profiles
+
+## Demo video
+
+https://youtu.be/BRE5-lADEeY
+
 ---
 
 Made with ❤️ for Moonshot thanks to Hack Club
