@@ -14,8 +14,8 @@ class Fusion {
       deltat = fusion.deltatUpdate();
 
       fusion.MahonyUpdate(
-        sensorData.gyroscope.x, sensorData.gyroscope.y, sensorData.gyroscope.z, 
-        sensorData.acceleration.x, sensorData.acceleration.y, sensorData.acceleration.z, 
+        sensorData.gyroscope.x, sensorData.gyroscope.y, sensorData.gyroscope.z,
+        sensorData.acceleration.x, sensorData.acceleration.y, sensorData.acceleration.z,
         sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, deltat
       );
 
@@ -36,6 +36,6 @@ class Fusion {
     }
 
   private:
-    float deltat, previousAltitude;
+    double deltat, previousAltitude;
     SF fusion;
 };

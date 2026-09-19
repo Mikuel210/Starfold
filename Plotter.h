@@ -1,16 +1,16 @@
 #pragma once
-// #define DEBUG
+#undef DEBUG
 
 class Debug {
   public:
-    static void plot(float number) {
+    static void plot(double number) {
       #ifdef DEBUG
       Serial.print(number);
       Serial.print(", ");
       #endif
     }
 
-    static void setLimits(float lowerEnd, float upperEnd) {
+    static void setLimits(double lowerEnd, double upperEnd) {
       #ifdef DEBUG
       plot(lowerEnd);
       plot(upperEnd);

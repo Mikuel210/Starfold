@@ -53,7 +53,7 @@ class FlightHardwareProvider : public IHardwareProvider {
       YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
     }
 
-    void throttleMotors(float throttlePercentage) override {
+    void throttleMotors(double throttlePercentage) override {
       int microseconds = (int)(throttlePercentage * 10 + 1000);
       microseconds = std::clamp(microseconds, 1000, 2000);
 
@@ -65,7 +65,7 @@ class FlightHardwareProvider : public IHardwareProvider {
       Leg.write(deploy ? 0 : 90);
     }
 
-    
+
     void updateWiggle(unsigned long timeLeftMillis) override {
       unsigned long wiggleStart = WIGGLE_T_MINUS * 1000;
       if (timeLeftMillis > wiggleStart) return;
@@ -102,7 +102,7 @@ class FlightHardwareProvider : public IHardwareProvider {
       analogWrite(LED_B, b);
     }
 
-    void toneBuzzer(float frequency) override {
+    void toneBuzzer(double frequency) override {
       tone(BUZZER, frequency);
     }
 
@@ -115,7 +115,7 @@ class FlightHardwareProvider : public IHardwareProvider {
     Servo XMinus;
     Servo YPlus;
     Servo YMinus;
-    
+
     Servo Esc;
     Servo Leg;
 

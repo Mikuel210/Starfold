@@ -3,5 +3,5 @@
 
 struct FusionData {
   Vector3 orientation;
-  float altitude;
+  double altitude;
 };

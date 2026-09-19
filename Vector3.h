@@ -1,6 +1,6 @@
 #pragma once
 
 struct Vector3 {
-  float x, y, z;
-  Vector3(float x_ = 0, float y_ = 0, float z_ = 0) : x(x_), y(y_), z(z_) {}
+  double x, y, z;
+  Vector3(double x_ = 0, double y_ = 0, double z_ = 0) : x(x_), y(y_), z(z_) {}
 };

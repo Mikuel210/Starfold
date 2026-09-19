@@ -17,37 +17,37 @@ class FlightHardwareProvider : public IHardwareProvider {
       */
     }
 
-    void throttleMotors(float throttlePercentage) override {
-      
+    void throttleMotors(double throttlePercentage) override {
+
     }
 
     void deployLegs(bool deploy = true) override {
-      
+
     }
 
-    
+
     void updateWiggle(unsigned long timeLeftMillis) override {
     }
 
     void updateCountdown(unsigned long timeLeftMillis) override {
-      
+
     }
 
 
     void lightLed(int r, int g, int b) override {
-      
+
     }
 
-    void toneBuzzer(float frequency) override {
-      
+    void toneBuzzer(double frequency) override {
+
     }
 
     void stopBuzzer() override {
-      
+
     }
 
   private:
     void wiggleStep(int angle) {
-    
+
     }
 };

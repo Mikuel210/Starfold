@@ -6,7 +6,7 @@
 
 // Flight profile
 #define HOVER_ALTITUDE 100
-#define LANDING_ALTITUDE 20 
+#define LANDING_ALTITUDE 20
 #define HOVER_SECONDS 10
 #define THROTTLE_UP_SECONDS 1
 
@@ -40,7 +40,7 @@ void setup() {
   hardwareProvider.initialize();
 }
 
-void loop() { 
+void loop() {
   unsigned long usStart = micros();
 
   switch (currentState) {
@@ -50,7 +50,7 @@ void loop() {
       // Reset state
       hardwareProvider.deployLegs(false);
       control.shutdown();
-      
+
       delay(3000);
 
       startupStartMillis = millis();
@@ -104,9 +104,9 @@ void loop() {
         currentState = LANDED;
 
       // Check abort
-      if (fabs(fusionData.orientation.x) > ABORT_THRESHOLD || fabs(fusionData.orientation.y) > ABORT_THRESHOLD)
+      if (abs(fusionData.orientation.x) > ABORT_THRESHOLD || abs(fusionData.orientation.y) > ABORT_THRESHOLD)
         currentState = ABORT;
-      
+
       // Debug
       Plotter::setLimits(-360, 360);
 

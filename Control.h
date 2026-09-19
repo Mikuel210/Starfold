@@ -22,7 +22,7 @@ class Control {
   public:
     Control(IHardwareProvider& hardwareProvider_) : hardwareProvider(hardwareProvider_) {}
 
-    void targetAltitude(float altitude) {
+    void targetAltitude(double altitude) {
       altitudePID.setpoint = altitude;
     }
 
@@ -40,25 +40,25 @@ class Control {
       hardwareProvider.applyCorrection(correction);
 
       // Throttle
-      float altitudeCorrection = altitudePID.getCorrection(data.altitude);
-      float throttlePercentage = fmap(altitudeCorrection, -100, 100, MIN_THROTTLE, MAX_THROTTLE);
+      double altitudeCorrection = altitudePID.getCorrection(data.altitude);
+      double throttlePercentage = dmap(altitudeCorrection, -100, 100, MIN_THROTTLE, MAX_THROTTLE);
       throttlePercentage = std::clamp(throttlePercentage, MIN_THROTTLE, MAX_THROTTLE);
       hardwareProvider.throttleMotors(throttlePercentage);
     }
 
   private:
     IHardwareProvider& hardwareProvider;
-    float previousRoll, previousTime;
+    double previousRoll, previousTime;
 
     PID xPID = PID(KP, KI, KD);
     PID yPID = PID(KP, KI, KD);
     PID altitudePID = PID(AKP, AKI, AKD, 5, 0.1f);
 
-    float getRollRate(float roll) {
+    double getRollRate(double roll) {
       unsigned long currentTime = micros();
 
       // Get rate with 360 to 0 warping
-      float rate = fmodf(roll - previousRoll + 540.0f, 360.0f);
+      double rate = fmodf(roll - previousRoll + 540.0f, 360.0f);
       if (rate < 0) rate += 360.0f;
       rate -= 180.0f;
 
@@ -71,7 +71,7 @@ class Control {
       return rate;
     }
 
-    float fmap(float x, float in_min, float in_max, float out_min, float out_max) {
+    double dmap(double x, double in_min, double in_max, double out_min, double out_max) {
       return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 };
