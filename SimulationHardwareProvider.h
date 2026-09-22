@@ -1,5 +1,6 @@
 #pragma once
 #include "IHardwareProvider.h"
+#include <cstdint>
 
 class FlightHardwareProvider : public IHardwareProvider {
   public:
@@ -38,11 +39,7 @@ class FlightHardwareProvider : public IHardwareProvider {
 
     }
 
-    void toneBuzzer(double frequency) override {
-
-    }
-
-    void stopBuzzer() override {
+    void writeBuzzer(uint8_t value) override {
 
     }
 

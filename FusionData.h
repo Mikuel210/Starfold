@@ -2,6 +2,7 @@
 #include "Vector3.h"
 
 struct FusionData {
-  Vector3 orientation;
-  double altitude;
+    Vector3 orientation;
+    double altitude;
+    bool underVoltage;
 };

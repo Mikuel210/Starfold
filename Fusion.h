@@ -6,36 +6,39 @@
 #include <SensorFusion.h>
 
 #define LIDAR_ALPHA 0.2f
+#define VOLTAGE_THRESHOLD 3.4
 
 class Fusion {
-  public:
-    FusionData getData(SensorData sensorData) {
-      FusionData fusionData;
-      deltat = fusion.deltatUpdate();
+    public:
+        static FusionData getData(SensorData sensorData) {
+            FusionData fusionData;
+            deltat = fusion.deltatUpdate();
 
-      fusion.MahonyUpdate(
-        sensorData.gyroscope.x, sensorData.gyroscope.y, sensorData.gyroscope.z,
-        sensorData.acceleration.x, sensorData.acceleration.y, sensorData.acceleration.z,
-        sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, deltat
-      );
+            fusion.MahonyUpdate(
+                sensorData.gyroscope.x, sensorData.gyroscope.y, sensorData.gyroscope.z,
+                sensorData.acceleration.x, sensorData.acceleration.y, sensorData.acceleration.z,
+                sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, deltat
+            );
 
-      // Z up
-      fusionData.orientation.x = fusion.getPitch();
-      fusionData.orientation.y = fusion.getRoll();
-      fusionData.orientation.z = fusion.getYaw();
+            // Z up
+            fusionData.orientation.x = fusion.getPitch();
+            fusionData.orientation.y = fusion.getRoll();
+            fusionData.orientation.z = fusion.getYaw();
 
-      // Make 0 = upright
-      if (fusionData.orientation.y > 0) fusionData.orientation.y -= 180;
-      else fusionData.orientation.y += 180;
+            // Make 0 = upright
+            if (fusionData.orientation.y > 0) fusionData.orientation.y -= 180;
+            else fusionData.orientation.y += 180;
 
-      // TODO: Fuse altitude with accelerometer, LiDAR and angle
-      fusionData.altitude = previousAltitude + LIDAR_ALPHA * (sensorData.distance - previousAltitude);
-      previousAltitude = fusionData.altitude;
+            // TODO: Fuse altitude with accelerometer, LiDAR and angle
+            fusionData.altitude = previousAltitude + LIDAR_ALPHA * (sensorData.distance - previousAltitude);
+            previousAltitude = fusionData.altitude;
 
-      return fusionData;
-    }
+            // BMS
+            fusionData.underVoltage = sensorData.voltage1 < VOLTAGE_THRESHOLD || sensorData.voltage2 < VOLTAGE_THRESHOLD;
+            return fusionData;
+        }
 
-  private:
-    double deltat, previousAltitude;
-    SF fusion;
+    private:
+        static double deltat, previousAltitude;
+        static SF fusion;
 };

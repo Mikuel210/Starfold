@@ -3,6 +3,7 @@
 #include "Fusion.h"
 #include "Control.h"
 #include "Plotter.h"
+#include "BMS.h"
 
 // Flight profile
 #define HOVER_ALTITUDE 100
@@ -16,127 +17,120 @@
 // Instances
 SensorDataProvider dataProvider;
 FlightHardwareProvider hardwareProvider;
-Control control = Control(hardwareProvider);
-Fusion fusion;
 
 // State machine
 enum State {
-  IDLE,
-  STARTUP,
-  FLIGHT,
-  ABORT,
-  LANDED
+    IDLE,
+    STARTUP,
+    FLIGHT,
+    ABORT,
+    LANDED
 };
 
 enum State currentState = IDLE;
 unsigned long startupStartMillis;
 unsigned long flightStartMillis;
 
-
 // Entry point
 void setup() {
-  Serial.begin(115200);
-  dataProvider.initialize();
-  hardwareProvider.initialize();
+    Serial.begin(115200);
+    dataProvider.initialize();
+    hardwareProvider.initialize();
+    Control::initialize(dataProvider, hardwareProvider);
+    BMS::initialize();
 }
 
 void loop() {
-  unsigned long usStart = micros();
+    unsigned long usStart = micros();
 
-  switch (currentState) {
-    case IDLE:
-      hardwareProvider.lightLed(0, 0, 255);
+    switch (currentState) {
+        case IDLE:
+            hardwareProvider.lightLed(0, 0, 255);
 
-      // Reset state
-      hardwareProvider.deployLegs(false);
-      control.shutdown();
+            // Reset state
+            hardwareProvider.deployLegs(false);
+            Control::shutdown();
+            delay(3000);
 
-      delay(3000);
+            startupStartMillis = millis();
+            currentState = STARTUP;
+            break;
 
-      startupStartMillis = millis();
-      currentState = STARTUP;
+        case STARTUP: {
+            hardwareProvider.lightLed(0, 150, 150);
+            unsigned long elapsed = millis() - startupStartMillis;
+            long timeLeft = STARTUP_SECONDS * 1000 - elapsed;
 
-      break;
+            dataProvider.calibrate();
+            hardwareProvider.updateWiggle(timeLeft);
+            hardwareProvider.updateCountdown(timeLeft);
 
-    case STARTUP: {
-      hardwareProvider.lightLed(0, 150, 150);
-      unsigned long elapsed = millis() - startupStartMillis;
-      long timeLeft = STARTUP_SECONDS * 1000 - elapsed;
+            // Stabilize angle
+            SensorData sensorData = dataProvider.getData();
+            FusionData fusionData = Fusion::getData(sensorData);
 
-      dataProvider.calibrate();
-      hardwareProvider.updateWiggle(timeLeft);
-      hardwareProvider.updateCountdown(timeLeft);
+            if (timeLeft <= 0) {
+                hardwareProvider.writeBuzzer(LOW);
+                flightStartMillis = millis();
+                currentState = FLIGHT;
+            }
 
-      // Stabilize angle
-      SensorData sensorData = dataProvider.getData();
-      FusionData fusionData = fusion.getData(sensorData);
+            break;
+        }
 
-      if (timeLeft <= 0) {
-        hardwareProvider.stopBuzzer();
-        flightStartMillis = millis();
-        currentState = FLIGHT;
-      }
+        case FLIGHT: {
+            hardwareProvider.lightLed(150, 0, 150);
+            unsigned long elapsed = millis() - flightStartMillis;
 
-      break;
+            // Set altitude and deploy legs
+            if (elapsed < THROTTLE_UP_SECONDS * 1000) {
+                Control::targetAltitude(0);
+            } else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) {
+                Control::targetAltitude(LANDING_ALTITUDE);
+                hardwareProvider.deployLegs();
+            } else {
+                Control::targetAltitude(HOVER_ALTITUDE);
+            }
+
+            // Update control system
+            SensorData sensorData = dataProvider.getData();
+            FusionData fusionData = Fusion::getData(sensorData);
+            Control::update(fusionData);
+
+            // Check for landing
+            if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000 && fusionData.altitude <= LANDING_ALTITUDE + 1)
+                currentState = LANDED;
+
+            // Check abort
+            if (abs(fusionData.orientation.x) > ABORT_THRESHOLD || abs(fusionData.orientation.y) > ABORT_THRESHOLD)
+                currentState = ABORT;
+
+            // Debug
+            Plotter::setLimits(-360, 360);
+            Plotter::plot(fusionData.orientation.x);
+            Plotter::plot(fusionData.orientation.y);
+            Plotter::plot(fusionData.orientation.z);
+
+            if (elapsed < THROTTLE_UP_SECONDS * 1000) Plotter::plot(0);
+            else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) Plotter::plot(LANDING_ALTITUDE);
+            else Plotter::plot(HOVER_ALTITUDE);
+
+            Plotter::endPlot();
+            break;
+        }
+
+        case ABORT:
+            hardwareProvider.lightLed(255, 0, 0);
+            Control::shutdown();
+            break;
+
+        case LANDED:
+            hardwareProvider.lightLed(0, 255, 0);
+            Control::shutdown();
+            break;
     }
 
-    case FLIGHT: {
-      hardwareProvider.lightLed(150, 0, 150);
-      unsigned long elapsed = millis() - flightStartMillis;
-
-      // Set altitude and deploy legs
-      if (elapsed < THROTTLE_UP_SECONDS * 1000) {
-        control.targetAltitude(0);
-      } else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) {
-        control.targetAltitude(LANDING_ALTITUDE);
-        hardwareProvider.deployLegs();
-      } else {
-        control.targetAltitude(HOVER_ALTITUDE);
-      }
-
-      // Update control system
-      SensorData sensorData = dataProvider.getData();
-      FusionData fusionData = fusion.getData(sensorData);
-      control.update(fusionData);
-
-      // Check for landing
-      if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000 && fusionData.altitude <= LANDING_ALTITUDE + 1)
-        currentState = LANDED;
-
-      // Check abort
-      if (abs(fusionData.orientation.x) > ABORT_THRESHOLD || abs(fusionData.orientation.y) > ABORT_THRESHOLD)
-        currentState = ABORT;
-
-      // Debug
-      Plotter::setLimits(-360, 360);
-
-      Plotter::plot(fusionData.orientation.x);
-      Plotter::plot(fusionData.orientation.y);
-      Plotter::plot(fusionData.orientation.z);
-
-      if (elapsed < THROTTLE_UP_SECONDS * 1000) Plotter::plot(0);
-      else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) Plotter::plot(LANDING_ALTITUDE);
-      else Plotter::plot(HOVER_ALTITUDE);
-
-      Plotter::endPlot();
-
-      break;
-    }
-
-    case ABORT:
-      hardwareProvider.lightLed(255, 0, 0);
-      control.shutdown();
-
-      break;
-
-    case LANDED:
-      hardwareProvider.lightLed(0, 255, 0);
-      control.shutdown();
-
-      break;
-  }
-
-  unsigned long usEnd = micros();
-  long usDelay = 20000 - (usEnd - usStart);
-  if (usDelay > 0) delayMicroseconds(usDelay);
+    unsigned long usEnd = micros();
+    long usDelay = 20000 - (usEnd - usStart);
+    if (usDelay > 0) delayMicroseconds(usDelay);
 }
