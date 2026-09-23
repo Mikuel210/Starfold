@@ -2,6 +2,7 @@
 #include "Vector3.h"
 #include "SensorData.h"
 #include "FusionData.h"
+#include "AltitudeKF.h"
 #include "Plotter.h"
 #include <SensorFusion.h>
 
@@ -10,7 +11,7 @@
 
 class Fusion {
     public:
-        static FusionData getData(SensorData sensorData) {
+        static FusionData getData(SensorData sensorData, double dt) {
             FusionData fusionData;
             deltat_s = fusion.deltat_sUpdate();
 
@@ -29,9 +30,11 @@ class Fusion {
             if (fusionData.orientation_deg.y > 0) fusionData.orientation_deg.y -= 180;
             else fusionData.orientation_deg.y += 180;
 
-            // TODO: Fuse altitude with accelerometer, LiDAR and angle
-            // TODO: Is this cm or mm? Probably add units to all variables
-            fusionData.altitude_mm = previousAltitude_mm + LIDAR_ALPHA * (sensorData.distance_cm * 10 - previousAltitude_mm);
+            // Altitude Kalman Filter
+            kf.predict(sensorData.accel_mps2.y * 1000, dt);
+            kf.update(sensorData.distance_cm * 10);
+
+            fusionData.altitude_mm = kf.s.position;
             previousAltitude_mm = fusionData.altitude_mm;
 
             // BMS
@@ -41,5 +44,6 @@ class Fusion {
 
     private:
         static double deltat_s, previousAltitude_mm;
+        static AltitudeKF kf;
         static SF fusion;
 };

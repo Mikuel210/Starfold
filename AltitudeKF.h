@@ -16,10 +16,11 @@ struct KFState {
 
 class AltitudeKF {
     public:
+        KFState s;
+
         AltitudeKF(double _lidarNoise, double _accelNoise, KFState _s)
             : lidarNoise(_lidarNoise), accelNoise(_accelNoise), s(_s) {}
 
-        // TODO: define SOT for units and axes
         void predict(double accelY, double dt) {
             // Predict position and velocity
             s.position = s.position + dt*s.velocity + 0.5*dt*dt*accelY;
@@ -54,7 +55,6 @@ class AltitudeKF {
         }
 
     private:
-        KFState s;
         double lidarNoise;
         double accelNoise;
 };
