@@ -10,7 +10,8 @@ class Task {
             : name(name_), function(function_) {}
 
         void await() {
-            while (!(*finished)) delay(1);
+            while (!(*finished))
+                delay(1);
         }
 
         void start(void* arg = NULL) {

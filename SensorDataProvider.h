@@ -37,15 +37,15 @@ class SensorDataProvider : public IDataProvider {
             SensorData data;
             IMU.update();
 
-            data.acceleration = readAccelerometer();
-            data.gyroscope = readGyroscope();
+            data.accel_mps2 = readAccelerometer();
+            data.gyro_radps = readGyroscope();
             data.magnetometer = readMagnetometer();
 
-            if (tfI2C.getData(tfDistance, tfAddress)) data.distance = tfDistance;
+            if (tfI2C.getData(tfDistance_cm, tfAddress)) data.distance_cm = tfDistance_cm;
             else tfI2C.printStatus();
 
-            data.voltage1 = analogRead(BMS_1) / 4023.0 * 3.3 * 2.0;
-            data.voltage1 = analogRead(BMS_2) / 4023.0 * 3.3 * 2.0;
+            data.voltage1_v = analogRead(BMS_1) / 4023.0 * 3.3 * 2.0;
+            data.voltage2_v = analogRead(BMS_2) / 4023.0 * 3.3 * 2.0;
             return data;
         }
 
@@ -88,6 +88,6 @@ class SensorDataProvider : public IDataProvider {
 
         // Distance
         TFLI2C tfI2C;
-        int16_t tfDistance;
+        int16_t tfDistance_cm;
         int16_t tfAddress = TFL_DEF_ADR;
 };

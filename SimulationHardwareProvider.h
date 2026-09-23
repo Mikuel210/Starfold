@@ -9,13 +9,11 @@ class FlightHardwareProvider : public IHardwareProvider {
       // maybe should check if it's established already on both
     }
 
-    void applyCorrection(Vector3 correction) override {
-      /*
-      XPlus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-      XMinus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-      YPlus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-      YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-      */
+    void applyCorrection(Vector3 correction_deg) override {
+      // XPlus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+      // XMinus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+      // YPlus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+      // YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
     }
 
     void throttleMotors(double throttlePercentage) override {
@@ -27,10 +25,10 @@ class FlightHardwareProvider : public IHardwareProvider {
     }
 
 
-    void updateWiggle(unsigned long timeLeftMillis) override {
+    void updateWiggle(unsigned long timeLeft_ms) override {
     }
 
-    void updateCountdown(unsigned long timeLeftMillis) override {
+    void updateCountdown(unsigned long timeLeft_ms) override {
 
     }
 

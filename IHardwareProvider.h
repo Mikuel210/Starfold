@@ -7,12 +7,12 @@ class IHardwareProvider {
         virtual ~IHardwareProvider() {}
         virtual void initialize() {}
 
-        virtual void applyCorrection(Vector3 correction) {}
+        virtual void applyCorrection(Vector3 correction_deg) {}
         virtual void throttleMotors(double throttlePercentage) {}
         virtual void deployLegs(bool deploy = true) {}
 
-        virtual void updateWiggle(unsigned long timeLeftMillis) {}
-        virtual void updateCountdown(unsigned long timeLeftMillis) {}
+        virtual void updateWiggle(unsigned long timeLeft_ms) {}
+        virtual void updateCountdown(unsigned long timeLeft_ms) {}
 
         virtual void lightLed(int r, int g, int b) {}
         virtual void writeBuzzer(uint8_t value) {}

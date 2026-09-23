@@ -12,12 +12,12 @@ class PID {
             : Kp(Kp_), Ki(Ki_), Kd(Kd_), setpoint(setpoint_), alpha(alpha_) {}
 
         double getCorrection(double input) {
-            unsigned long currentTime = micros();
-            unsigned long elapsedTime = currentTime - previousTime;
+            unsigned long currentMicros = micros();
+            unsigned long elapsedMicros = currentMicros - previousMicros;
 
             double error = setpoint - input;
-            errorIntegral += error * elapsedTime / 1000000 * INTEGRAL_RATE;
-            double errorRate = (error - lastError) / elapsedTime * 100000;
+            errorIntegral += error * elapsedMicros / 1000000 * INTEGRAL_RATE;
+            double errorRate = (error - lastError) / elapsedMicros * 100000;
 
             if (abs(errorIntegral) > INTEGRAL_LIMIT)
                 errorIntegral = (errorIntegral > 0 ? 1 : -1) * INTEGRAL_LIMIT;
@@ -30,11 +30,11 @@ class PID {
             previousOutput = output;
 
             lastError = error;
-            previousTime = currentTime;
+            previousTime = currentMicros;
 
             return output;
         }
 
     private:
-        double lastError, errorIntegral, previousTime, previousOutput;
+        double lastError, errorIntegral, previousMicros, previousOutput;
 };
