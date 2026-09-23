@@ -30,6 +30,7 @@ class Fusion {
             else fusionData.orientation.y += 180;
 
             // TODO: Fuse altitude with accelerometer, LiDAR and angle
+            // TODO: Is this cm or mm? Probably add units to all variables
             fusionData.altitude = previousAltitude + LIDAR_ALPHA * (sensorData.distance - previousAltitude);
             previousAltitude = fusionData.altitude;
 
