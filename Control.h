@@ -25,12 +25,12 @@ class Control {
         static IDataProvider* dataProvider;
         static IHardwareProvider* hardwareProvider;
 
-        static void initialize(IDataProvider& _dataProvider, IHardwareProvider _hardwareProvider) {
+        static void initialize(IDataProvider& _dataProvider, IHardwareProvider& _hardwareProvider) {
             dataProvider = &_dataProvider;
             hardwareProvider = &_hardwareProvider;
         }
 
-        static void targetAltitude(double altitude) {
+        static void targetAltitude_mm(double altitude) {
             altitudePID.setpoint = altitude;
         }
 
@@ -42,14 +42,14 @@ class Control {
         static void update(FusionData data) {
             // TVC
             Vector3 correction;
-            correction.x = xPID.getCorrection(data.orientation.x);
-            correction.y = yPID.getCorrection(data.orientation.y);
-            correction.z = getRollRate(data.orientation.z) * KD;
+            correction.x = xPID.getCorrection(data.orientation_deg.x);
+            correction.y = yPID.getCorrection(data.orientation_deg.y);
+            correction.z = getRollRate(data.orientation_deg.z) * KD;
             hardwareProvider->applyCorrection(correction);
 
             // Throttle
-            double altitudeCorrection = altitudePID.getCorrection(data.altitude);
-            double throttlePercentage = dmap(altitudeCorrection, -100, 100, MIN_THROTTLE, MAX_THROTTLE);
+            double altitudeCorrection = altitudePID.getCorrection(data.altitude_mm);
+            double throttlePercentage = dmap(altitudeCorrection, -1000, 1000, MIN_THROTTLE, MAX_THROTTLE);
             throttlePercentage = std::clamp(throttlePercentage, MIN_THROTTLE, MAX_THROTTLE);
             hardwareProvider->throttleMotors(throttlePercentage);
         }
@@ -66,8 +66,8 @@ class Control {
             if (rate < 0) rate += 360.0;
             rate -= 180.0;
 
-            rate /= previousTime - currentTime;
-            rate *= 100000; // Micros to seconds
+            rate /= currentTime - previousTime;
+            rate /= 1'000'000.0; // Micros to seconds
 
             previousRoll = roll;
             previousTime = currentTime;

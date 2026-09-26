@@ -1,3 +1,7 @@
+// Globals
+#define HZ 50
+#define G 9.807
+
 #include "SensorDataProvider.h"
 #include "FlightHardwareProvider.h"
 #include "Fusion.h"
@@ -6,12 +10,12 @@
 #include "BMS.h"
 
 // Flight profile
-#define HOVER_ALTITUDE 100
-#define LANDING_ALTITUDE 20
+#define HOVER_ALTITUDE_MM 1000
+#define LANDING_ALTITUDE_MM 200
 #define HOVER_SECONDS 10
 #define THROTTLE_UP_SECONDS 1
 
-#define ABORT_THRESHOLD 45
+#define ABORT_THRESHOLD_DEG 45
 #define STARTUP_SECONDS 20
 
 // Instances
@@ -30,6 +34,7 @@ enum State {
 enum State currentState = IDLE;
 unsigned long startupStartMillis;
 unsigned long flightStartMillis;
+unsigned long dt_s;
 
 // Entry point
 void setup() {
@@ -67,7 +72,7 @@ void loop() {
 
             // Stabilize angle
             SensorData sensorData = dataProvider.getData();
-            FusionData fusionData = Fusion::getData(sensorData);
+            FusionData fusionData = Fusion::getData(sensorData, dt_s);
 
             if (timeLeft <= 0) {
                 hardwareProvider.writeBuzzer(LOW);
@@ -84,36 +89,36 @@ void loop() {
 
             // Set altitude and deploy legs
             if (elapsed < THROTTLE_UP_SECONDS * 1000) {
-                Control::targetAltitude(0);
+                Control::targetAltitude_mm(0);
             } else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) {
-                Control::targetAltitude(LANDING_ALTITUDE);
+                Control::targetAltitude_mm(LANDING_ALTITUDE_MM);
                 hardwareProvider.deployLegs();
             } else {
-                Control::targetAltitude(HOVER_ALTITUDE);
+                Control::targetAltitude_mm(HOVER_ALTITUDE_MM);
             }
 
             // Update control system
             SensorData sensorData = dataProvider.getData();
-            FusionData fusionData = Fusion::getData(sensorData);
+            FusionData fusionData = Fusion::getData(sensorData, dt_s);
             Control::update(fusionData);
 
             // Check for landing
-            if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000 && fusionData.altitude <= LANDING_ALTITUDE + 1)
+            if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000 && fusionData.altitude_mm <= LANDING_ALTITUDE_MM + 1)
                 currentState = LANDED;
 
             // Check abort
-            if (abs(fusionData.orientation.x) > ABORT_THRESHOLD || abs(fusionData.orientation.y) > ABORT_THRESHOLD)
+            if (abs(fusionData.orientation_deg.x) > ABORT_THRESHOLD_DEG || abs(fusionData.orientation_deg.y) > ABORT_THRESHOLD_DEG)
                 currentState = ABORT;
 
             // Debug
             Plotter::setLimits(-360, 360);
-            Plotter::plot(fusionData.orientation.x);
-            Plotter::plot(fusionData.orientation.y);
-            Plotter::plot(fusionData.orientation.z);
+            Plotter::plot(fusionData.orientation_deg.x);
+            Plotter::plot(fusionData.orientation_deg.y);
+            Plotter::plot(fusionData.orientation_deg.z);
 
             if (elapsed < THROTTLE_UP_SECONDS * 1000) Plotter::plot(0);
-            else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) Plotter::plot(LANDING_ALTITUDE);
-            else Plotter::plot(HOVER_ALTITUDE);
+            else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) Plotter::plot(LANDING_ALTITUDE_MM);
+            else Plotter::plot(HOVER_ALTITUDE_MM);
 
             Plotter::endPlot();
             break;
@@ -131,6 +136,13 @@ void loop() {
     }
 
     unsigned long usEnd = micros();
-    long usDelay = 20000 - (usEnd - usStart);
-    if (usDelay > 0) delayMicroseconds(usDelay);
+    long usDelay = 1'000'000.0 / HZ - (usEnd - usStart);
+
+    if (usDelay <= 0) {
+        dt_s = (usEnd - usStart) / 1'000'000.0;
+        return;
+    }
+
+    dt_s = (usEnd - usStart + usDelay) / 1'000'000.0;
+    delayMicroseconds(usDelay);
 }

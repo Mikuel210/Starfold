@@ -21,18 +21,19 @@ class BMS {
     private:
         static void bmsTask(void* task) {
             TaskArgs* args = (TaskArgs*)task;
+            double delay_ms = 1000.0 / BMS_HZ / 2;
 
             while (true) {
                 unsigned long msStart = millis();
                 SensorData sensorData = Control::dataProvider->getData();
-                FusionData fusionData = Fusion::getData(sensorData);
+                FusionData fusionData = Fusion::getVoltageData(sensorData);
 
                 if (fusionData.underVoltage) Control::hardwareProvider->writeBuzzer(HIGH);
-                vTaskDelay(max(1000.0 / BMS_HZ / 2 - (millis() - msStart), 0.0));
+                vTaskDelay(max((delay_ms - (millis() - msStart)) / portTICK_PERIOD_MS, 0.0));
 
                 unsigned long msStop = millis();
                 Control::hardwareProvider->writeBuzzer(LOW);
-                vTaskDelay(max(1000.0 / BMS_HZ / 2 - (millis() - msStop), 0.0));
+                vTaskDelay(max((delay_ms - (millis() - msStop)) / portTICK_PERIOD_MS, 0.0));
             }
 
             args->task->stop();

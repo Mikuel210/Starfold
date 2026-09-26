@@ -7,8 +7,6 @@
 #include <FastIMU.h>
 
 #define IMU_ADDRESS 0x68
-#define G -9.807
-#define DEG2RAD 0.01745329251f
 #define BMS_1 36
 #define BMS_2 39
 
@@ -41,8 +39,15 @@ class SensorDataProvider : public IDataProvider {
             data.gyro_radps = readGyroscope();
             data.magnetometer = readMagnetometer();
 
-            if (tfI2C.getData(tfDistance_cm, tfAddress)) data.distance_cm = tfDistance_cm;
-            else tfI2C.printStatus();
+            if (tfI2C.getData(tfDistance_cm, tfAddress)) {
+                data.lidarAvaliable = true;
+                data.distance_cm = tfDistance_cm;
+            } else {
+                data.lidarAvaliable = false;
+                #ifdef DEBUG
+                tfI2C.printStatus();
+                #endif
+            }
 
             data.voltage1_v = analogRead(BMS_1) / 4023.0 * 3.3 * 2.0;
             data.voltage2_v = analogRead(BMS_2) / 4023.0 * 3.3 * 2.0;
@@ -69,9 +74,9 @@ class SensorDataProvider : public IDataProvider {
         Vector3 readGyroscope() {
             Vector3 gyroscope;
             IMU.getGyro(&gyroData);
-            gyroscope.x = gyroData.gyroX * DEG2RAD;
-            gyroscope.y = gyroData.gyroY * DEG2RAD;
-            gyroscope.z = gyroData.gyroZ * DEG2RAD;
+            gyroscope.x = gyroData.gyroX / RAD_TO_DEG;
+            gyroscope.y = gyroData.gyroY / RAD_TO_DEG;
+            gyroscope.z = gyroData.gyroZ / RAD_TO_DEG;
 
             return gyroscope;
         }

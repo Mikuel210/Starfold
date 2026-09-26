@@ -30,7 +30,7 @@ class PID {
             previousOutput = output;
 
             lastError = error;
-            previousTime = currentMicros;
+            previousMicros = currentMicros;
 
             return output;
         }

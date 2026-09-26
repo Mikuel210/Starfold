@@ -6,14 +6,15 @@
 #include "Plotter.h"
 #include <SensorFusion.h>
 
-#define LIDAR_ALPHA 0.2f
+#define LIDAR_ALPHA 0.2
 #define VOLTAGE_THRESHOLD_V 3.4
+#define G 9.807
 
 class Fusion {
     public:
-        static FusionData getData(SensorData sensorData, double dt) {
+        static FusionData getData(SensorData sensorData, double dt_s) {
             FusionData fusionData;
-            deltat_s = fusion.deltat_sUpdate();
+            deltat_s = fusion.deltatUpdate();
 
             fusion.MahonyUpdate(
                 sensorData.gyro_radps.x, sensorData.gyro_radps.y, sensorData.gyro_radps.z,
@@ -21,24 +22,37 @@ class Fusion {
                 sensorData.magnetometer.x, sensorData.magnetometer.y, sensorData.magnetometer.z, deltat_s
             );
 
-            // Z up
+            // Z up/roll
             fusionData.orientation_deg.x = fusion.getPitch();
-            fusionData.orientation_deg.y = fusion.getRoll();
-            fusionData.orientation_deg.z = fusion.getYaw();
+            fusionData.orientation_deg.y = fusion.getYaw();
+            fusionData.orientation_deg.z = fusion.getRoll();
 
-            // Make 0 = upright
-            if (fusionData.orientation_deg.y > 0) fusionData.orientation_deg.y -= 180;
-            else fusionData.orientation_deg.y += 180;
+            // Transform to world space
+            double x_rad = fusionData.orientation_deg.x / RAD_TO_DEG;
+            double y_rad = fusionData.orientation_deg.y / RAD_TO_DEG;
+            double correctedDistance_mm = sensorData.distance_cm * 10.0 * cos(x_rad) * cos(y_rad);
+
+            // TODO: Transform to world space
+            double rocketAccelZ_mmps2 = (sensorData.accel_mps2.z - G) * 1000;
 
             // Altitude Kalman Filter
-            kf.predict(sensorData.accel_mps2.y * 1000, dt);
-            kf.update(sensorData.distance_cm * 10);
+            kf.predict(rocketAccelZ_mmps2, dt_s);
+            if (sensorData.lidarAvaliable) kf.update(correctedDistance_mm);
 
             fusionData.altitude_mm = kf.s.position;
             previousAltitude_mm = fusionData.altitude_mm;
 
             // BMS
-            fusionData.underVoltage = sensorData.voltage1_v < VOLTAGE_THRESHOLD_V || sensorData.voltage2_v < VOLTAGE_THRESHOLD_V;
+            fusionData.underVoltage = getVoltageData(sensorData).underVoltage;
+            return fusionData;
+        }
+
+        static FusionData getVoltageData(SensorData sensorData) {
+            FusionData fusionData;
+
+            fusionData.underVoltage = sensorData.voltage1_v < VOLTAGE_THRESHOLD_V
+                || sensorData.voltage2_v < VOLTAGE_THRESHOLD_V;
+
             return fusionData;
         }
 
