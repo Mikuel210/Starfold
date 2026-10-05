@@ -1,16 +1,17 @@
 #pragma once
-
 #include "IDataProvider.h"
 #include "IHardwareProvider.h"
 #include "FusionData.h"
 #include "PID.h"
+#include "Plotter.h"
 #include <algorithm>
 #include <Arduino.h>
 
 // TVC
-#define KP 1
+#define KP 2
 #define KI 0.25
-#define KD 2
+#define KD 5
+#define RKD 25
 
 // Altitude
 #define AKP 1
@@ -44,8 +45,9 @@ class Control {
             Vector3 correction;
             correction.x = xPID.getCorrection(data.orientation_deg.x);
             correction.y = yPID.getCorrection(data.orientation_deg.y);
-            correction.z = getRollRate(data.orientation_deg.z) * KD;
+            correction.z = getRollRate(data.orientation_deg.z) * RKD;
             hardwareProvider->applyCorrection(correction);
+            Plotter::plot("roll", correction.z);
 
             // Throttle
             double altitudeCorrection = altitudePID.getCorrection(data.altitude_mm);
@@ -65,13 +67,10 @@ class Control {
             double rate = fmodf(roll - previousRoll + 540.0, 360.0);
             if (rate < 0) rate += 360.0;
             rate -= 180.0;
-
-            rate /= currentTime - previousTime;
-            rate /= 1'000'000.0; // Micros to seconds
+            rate /= (currentTime - previousTime) / 10'000.0;
 
             previousRoll = roll;
             previousTime = currentTime;
-
             return rate;
         }
 

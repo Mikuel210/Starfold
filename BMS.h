@@ -7,7 +7,7 @@
 #include "TaskArgs.h"
 
 // BMS parameters
-#define BMS_HZ 1
+#define BMS_HZ 1.0
 
 class BMS {
     public:

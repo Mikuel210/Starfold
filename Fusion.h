@@ -24,8 +24,8 @@ class Fusion {
 
             // Z up/roll
             fusionData.orientation_deg.x = fusion.getPitch();
-            fusionData.orientation_deg.y = fusion.getYaw();
-            fusionData.orientation_deg.z = fusion.getRoll();
+            fusionData.orientation_deg.y = fusion.getRoll();
+            fusionData.orientation_deg.z = fusion.getYaw();
 
             // Transform to world space
             double x_rad = fusionData.orientation_deg.x / RAD_TO_DEG;
@@ -44,6 +44,17 @@ class Fusion {
 
             // BMS
             fusionData.underVoltage = getVoltageData(sensorData).underVoltage;
+
+            // Debug
+            Plotter::setLimits(-360, 360);
+            Plotter::plot("ax", sensorData.accel_mps2.x);
+            Plotter::plot("ay", sensorData.accel_mps2.y);
+            Plotter::plot("az", sensorData.accel_mps2.z);
+            Plotter::plot("x", fusionData.orientation_deg.x);
+            Plotter::plot("y", fusionData.orientation_deg.y);
+            Plotter::plot("z", fusionData.orientation_deg.z);
+            Plotter::endPlot();
+
             return fusionData;
         }
 

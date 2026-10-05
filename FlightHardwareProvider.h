@@ -4,6 +4,10 @@
 #include <ESP32Servo.h>
 #include <algorithm>
 
+// Parameters
+#undef UNPOWERED_TVC
+#define UNPOWERED_ESC
+
 // Actuators
 #define TVC_LIMIT 45.0
 #define X_PLUS 26
@@ -37,34 +41,48 @@ class FlightHardwareProvider : public IHardwareProvider {
             pinMode(LED_B, OUTPUT);
             pinMode(BUZZER, OUTPUT);
 
+            #ifndef UNPOWERED_TVC
             XPlus.attach(X_PLUS);
             XMinus.attach(X_MINUS);
             YPlus.attach(Y_PLUS);
             YMinus.attach(Y_MINUS);
+            #endif
+
+            #ifndef UNPOWERED_ESC
+            Leg.attach(LEG);
+            #endif
 
             Esc.attach(ESC);
-            Leg.attach(LEG);
         }
 
         void applyCorrection(Vector3 correction) override {
-            XPlus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-            XMinus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-            YPlus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-            YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+            #ifndef UNPOWERED_TVC
+            XPlus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+            XMinus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+            YPlus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+            YMinus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+            #endif
         }
 
         void throttleMotors(double throttlePercentage) override {
+            #ifndef UNPOWERED_ESC
             int microseconds = (int)(throttlePercentage * 10 + 1000);
             microseconds = std::clamp(microseconds, 1000, 2000);
 
             Esc.writeMicroseconds(microseconds);
+            #else
+            Esc.writeMicroseconds(1000);
+            #endif
         }
 
         void deployLegs(bool deploy = true) override {
+            #ifndef UNPOWERED_ESC
             Leg.write(deploy ? 0 : 90);
+            #endif
         }
 
         void updateWiggle(unsigned long timeLeftMillis) override {
+            #ifndef UNPOWERED_TVC
             unsigned long wiggleStart = WIGGLE_T_MINUS * 1000;
             if (timeLeftMillis > wiggleStart) return;
 
@@ -82,6 +100,7 @@ class FlightHardwareProvider : public IHardwareProvider {
             else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 3000) wiggleStep(-WIGGLE_ANGLE);
             else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 2000) wiggleStep(0);
             else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 1000) wiggleStep(WIGGLE_ANGLE);
+            #endif
         }
 
         void updateCountdown(unsigned long timeLeftMillis) override {

@@ -1,6 +1,7 @@
 // Globals
 #define HZ 50
 #define G 9.807
+#define DEBUG
 
 #include "SensorDataProvider.h"
 #include "FlightHardwareProvider.h"
@@ -12,7 +13,7 @@
 // Flight profile
 #define HOVER_ALTITUDE_MM 1000
 #define LANDING_ALTITUDE_MM 200
-#define HOVER_SECONDS 10
+#define HOVER_SECONDS 1000 // TODO 10
 #define THROTTLE_UP_SECONDS 1
 
 #define ABORT_THRESHOLD_DEG 45
@@ -57,6 +58,7 @@ void loop() {
             Control::shutdown();
             delay(3000);
 
+            dataProvider.calibrate();
             startupStartMillis = millis();
             currentState = STARTUP;
             break;
@@ -66,7 +68,6 @@ void loop() {
             unsigned long elapsed = millis() - startupStartMillis;
             long timeLeft = STARTUP_SECONDS * 1000 - elapsed;
 
-            dataProvider.calibrate();
             hardwareProvider.updateWiggle(timeLeft);
             hardwareProvider.updateCountdown(timeLeft);
 
@@ -110,17 +111,6 @@ void loop() {
             if (abs(fusionData.orientation_deg.x) > ABORT_THRESHOLD_DEG || abs(fusionData.orientation_deg.y) > ABORT_THRESHOLD_DEG)
                 currentState = ABORT;
 
-            // Debug
-            Plotter::setLimits(-360, 360);
-            Plotter::plot(fusionData.orientation_deg.x);
-            Plotter::plot(fusionData.orientation_deg.y);
-            Plotter::plot(fusionData.orientation_deg.z);
-
-            if (elapsed < THROTTLE_UP_SECONDS * 1000) Plotter::plot(0);
-            else if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000) Plotter::plot(LANDING_ALTITUDE_MM);
-            else Plotter::plot(HOVER_ALTITUDE_MM);
-
-            Plotter::endPlot();
             break;
         }
 

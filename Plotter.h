@@ -1,10 +1,12 @@
 #pragma once
-#undef DEBUG
+#include <Arduino.h>
 
 class Plotter {
     public:
-        static void plot(double number) {
+        static void plot(String name, double number) {
             #ifdef DEBUG
+            Serial.print(name);
+            Serial.print(":");
             Serial.print(number);
             Serial.print(", ");
             #endif
@@ -12,8 +14,8 @@ class Plotter {
 
         static void setLimits(double lowerEnd, double upperEnd) {
             #ifdef DEBUG
-            plot(lowerEnd);
-            plot(upperEnd);
+            plot("LOWER_LIMIT", lowerEnd);
+            plot("UPPER_LIMIT", upperEnd);
             #endif
         }
 
