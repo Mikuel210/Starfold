@@ -1,5 +1,5 @@
 #pragma once
-#include "IHardwareProvider.h"
+#include "src/hardware/IHardwareProvider.h"
 #include <cstdint>
 
 class FlightHardwareProvider : public IHardwareProvider {

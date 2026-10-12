@@ -1,11 +1,11 @@
 #pragma once
-#include "IHardwareProvider.h"
-#include "Plotter.h"
+#include "src/hardware/IHardwareProvider.h"
+#include "src/Plotter.h"
 #include <ESP32Servo.h>
 #include <algorithm>
 
 // Parameters
-#undef UNPOWERED_TVC
+#define UNPOWERED_TVC
 #define UNPOWERED_ESC
 
 // Actuators

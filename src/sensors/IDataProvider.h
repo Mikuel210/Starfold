@@ -1,5 +1,5 @@
 #pragma once
-#include "SensorData.h"
+#include "src/sensors/SensorData.h"
 
 class IDataProvider {
     public:

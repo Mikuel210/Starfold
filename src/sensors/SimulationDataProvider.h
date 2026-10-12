@@ -1,7 +1,7 @@
 #pragma once
-#include "IDataProvider.h"
+#include "src/sensors/IDataProvider.h"
 
-class SensorDataProvider : public IDataProvider {
+class SimulationDataProvider : public IDataProvider {
     public:
         void initialize() override {
             // Serial becomes communication not debugging

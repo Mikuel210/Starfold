@@ -1,5 +1,5 @@
 #pragma once
-#include "Vector3.h"
+#include "src/Vector3.h"
 
 struct SensorData {
     Vector3 accel_mps2;

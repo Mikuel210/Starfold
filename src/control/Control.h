@@ -1,9 +1,9 @@
 #pragma once
-#include "IDataProvider.h"
-#include "IHardwareProvider.h"
-#include "FusionData.h"
-#include "PID.h"
-#include "Plotter.h"
+#include "src/sensors/IDataProvider.h"
+#include "src/hardware/IHardwareProvider.h"
+#include "src/fusion/FusionData.h"
+#include "src/control/PID.h"
+#include "src/Plotter.h"
 #include <algorithm>
 #include <Arduino.h>
 
@@ -47,7 +47,6 @@ class Control {
             correction.y = yPID.getCorrection(data.orientation_deg.y);
             correction.z = getRollRate(data.orientation_deg.z) * RKD;
             hardwareProvider->applyCorrection(correction);
-            Plotter::plot("roll", correction.z);
 
             // Throttle
             double altitudeCorrection = altitudePID.getCorrection(data.altitude_mm);

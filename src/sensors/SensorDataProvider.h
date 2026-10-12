@@ -1,6 +1,6 @@
 #pragma once
-#include "IDataProvider.h"
-#include "Plotter.h"
+#include "src/sensors/IDataProvider.h"
+#include "src/Plotter.h"
 #include <Arduino.h>
 #include <Wire.h>
 #include <TFLI2C.h>

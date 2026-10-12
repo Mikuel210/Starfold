@@ -1,21 +1,24 @@
 #pragma once
-#include "IDataProvider.h"
-#include "IHardwareProvider.h"
-#include "Control.h"
-#include "Fusion.h"
-#include "Task.h"
-#include "TaskArgs.h"
+#include "src/sensors/IDataProvider.h"
+#include "src/hardware/IHardwareProvider.h"
+#include "src/control/Control.h"
+#include "src/fusion/Fusion.h"
+#include "src/tasks/Task.h"
+#include "src/tasks/TaskArgs.h"
 
 // BMS parameters
-#define BMS_HZ 1.0
+#define BMS_HZ 2.0
+#define DISABLE_BMS
 
 class BMS {
     public:
         static void initialize() {
+            #ifndef DISABLE_BMS
             Task* task = new Task("bms", bmsTask);
             TaskArgs* args = new TaskArgs();
             args->task = task;
             task->start(args);
+            #endif
         }
 
     private:

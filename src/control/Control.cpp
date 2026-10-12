@@ -1,5 +1,5 @@
 #pragma once
-#include "Control.h"
+#include "src/control/Control.h"
 
 IDataProvider* Control::dataProvider = nullptr;
 IHardwareProvider* Control::hardwareProvider = nullptr;

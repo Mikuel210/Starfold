@@ -1,27 +1,36 @@
+#pragma once
+//
 // Globals
 #define HZ 50
 #define G 9.807
 #define DEBUG
+#undef SIMULATION
 
-#include "SensorDataProvider.h"
-#include "FlightHardwareProvider.h"
-#include "Fusion.h"
-#include "Control.h"
-#include "Plotter.h"
-#include "BMS.h"
+#include "src/fusion/Fusion.h"
+#include "src/control/Control.h"
+#include "src/Plotter.h"
+#include "src/BMS.h"
 
 // Flight profile
 #define HOVER_ALTITUDE_MM 1000
 #define LANDING_ALTITUDE_MM 200
-#define HOVER_SECONDS 1000 // TODO 10
+#define HOVER_SECONDS 10
 #define THROTTLE_UP_SECONDS 1
-
-#define ABORT_THRESHOLD_DEG 45
+#define ABORT_THRESHOLD_DEG 40
 #define STARTUP_SECONDS 20
 
 // Instances
-SensorDataProvider dataProvider;
-FlightHardwareProvider hardwareProvider;
+#ifdef SIMULATION
+    #include "src/sensors/SimulationDataProvider.h"
+    #include "src/hardware/SimulationHardwareProvider.h"
+    SimulationDataProvider dataProvider;
+    SimulationHardwareProvider hardwareProvider;
+#else
+    #include "src/sensors/SensorDataProvider.h"
+    #include "src/hardware/FlightHardwareProvider.h"
+    SensorDataProvider dataProvider;
+    FlightHardwareProvider hardwareProvider;
+#endif
 
 // State machine
 enum State {
@@ -35,7 +44,7 @@ enum State {
 enum State currentState = IDLE;
 unsigned long startupStartMillis;
 unsigned long flightStartMillis;
-unsigned long dt_s;
+double dt_s;
 
 // Entry point
 void setup() {

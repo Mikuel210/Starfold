@@ -1,9 +1,9 @@
 #pragma once
-#include "Vector3.h"
-#include "SensorData.h"
-#include "FusionData.h"
-#include "AltitudeKF.h"
-#include "Plotter.h"
+#include "src/sensors/SensorData.h"
+#include "src/fusion/FusionData.h"
+#include "src/fusion/AltitudeKF.h"
+#include "src/Vector3.h"
+#include "src/Plotter.h"
 #include <SensorFusion.h>
 
 #define LIDAR_ALPHA 0.2
@@ -31,11 +31,10 @@ class Fusion {
             double x_rad = fusionData.orientation_deg.x / RAD_TO_DEG;
             double y_rad = fusionData.orientation_deg.y / RAD_TO_DEG;
             double correctedDistance_mm = sensorData.distance_cm * 10.0 * cos(x_rad) * cos(y_rad);
-
-            // TODO: Transform to world space
-            double rocketAccelZ_mmps2 = (sensorData.accel_mps2.z - G) * 1000;
+            if (correctedDistance_mm < 30) correctedDistance_mm = 0;
 
             // Altitude Kalman Filter
+            double rocketAccelZ_mmps2 = getWorldAccelZ_mmps2(sensorData);
             kf.predict(rocketAccelZ_mmps2, dt_s);
             if (sensorData.lidarAvaliable) kf.update(correctedDistance_mm);
 
@@ -46,13 +45,10 @@ class Fusion {
             fusionData.underVoltage = getVoltageData(sensorData).underVoltage;
 
             // Debug
-            Plotter::setLimits(-360, 360);
-            Plotter::plot("ax", sensorData.accel_mps2.x);
-            Plotter::plot("ay", sensorData.accel_mps2.y);
-            Plotter::plot("az", sensorData.accel_mps2.z);
-            Plotter::plot("x", fusionData.orientation_deg.x);
-            Plotter::plot("y", fusionData.orientation_deg.y);
-            Plotter::plot("z", fusionData.orientation_deg.z);
+            Plotter::plot("rd", sensorData.distance_cm * 10.0);
+            Plotter::plot("d", correctedDistance_mm);
+            Plotter::plot("accel", rocketAccelZ_mmps2);
+            Plotter::plot("alt", fusionData.altitude_mm);
             Plotter::endPlot();
 
             return fusionData;
@@ -71,4 +67,22 @@ class Fusion {
         static double deltat_s, previousAltitude_mm;
         static AltitudeKF kf;
         static SF fusion;
+
+        static double getWorldAccelZ_mmps2(SensorData sensorData) {
+            float* q = fusion.getQuat();
+            float w = q[0], x = q[1], y = q[2], z = q[3];
+
+            double ax = sensorData.accel_mps2.x;
+            double ay = sensorData.accel_mps2.y;
+            double az = sensorData.accel_mps2.z;
+
+            // Third row of the body -> world rotation matrix
+            double worldAccelZ_mps2 =
+                2.0 * (x*z - w*y) * ax +
+                2.0 * (y*z + w*x) * ay +
+                (1.0 - 2.0 * (x*x + y*y)) * az;
+
+            // Remove gravity in world space
+            return (worldAccelZ_mps2 - G) * 1000 + 5;
+        }
 };

@@ -16,8 +16,8 @@ class PID {
             unsigned long elapsedMicros = currentMicros - previousMicros;
 
             double error = setpoint - input;
-            errorIntegral += error * elapsedMicros / 1000000 * INTEGRAL_RATE;
-            double errorRate = (error - lastError) / elapsedMicros * 100000;
+            errorIntegral += error * elapsedMicros / 1'000'000.0 * INTEGRAL_RATE;
+            double errorRate = (error - lastError) / elapsedMicros * 100'000.0;
 
             if (abs(errorIntegral) > INTEGRAL_LIMIT)
                 errorIntegral = (errorIntegral > 0 ? 1 : -1) * INTEGRAL_LIMIT;
