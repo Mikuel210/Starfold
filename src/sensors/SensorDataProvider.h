@@ -36,17 +36,15 @@ class SensorDataProvider : public IDataProvider {
             calData calib = { 0 };
             IMU.calibrateAccelGyro(&calib);
 
-            #ifdef DEBUG
-            Serial.println("Accel biases: ");
+            Plotter::log("Accel biases:");
             Plotter::plot("x", calib.accelBias[0]);
             Plotter::plot("y", calib.accelBias[1]);
             Plotter::plot("z", calib.accelBias[2]);
 
-            Serial.println("Gyro biases X/Y/Z: ");
+            Plotter::log("Gyro biases:");
             Plotter::plot("x", calib.gyroBias[0]);
             Plotter::plot("y", calib.gyroBias[0]);
             Plotter::plot("z", calib.gyroBias[0]);
-            #endif
 
             IMU.init(calib, IMU_ADDRESS);
         }
@@ -60,10 +58,10 @@ class SensorDataProvider : public IDataProvider {
             data.magnetometer = readMagnetometer();
 
             if (tfI2C.getData(tfDistance_cm, tfAddress)) {
-                data.lidarAvaliable = true;
+                data.lidarAvailable = true;
                 data.distance_cm = tfDistance_cm;
             } else {
-                data.lidarAvaliable = false;
+                data.lidarAvailable = false;
                 #ifdef DEBUG
                 tfI2C.printStatus();
                 #endif

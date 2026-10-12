@@ -9,7 +9,7 @@ struct SensorData {
     Vector3 magnetometer;
 
     double distance_cm;
-    bool lidarAvaliable;
+    bool lidarAvailable;
     double voltage1_v;
     double voltage2_v;
 };

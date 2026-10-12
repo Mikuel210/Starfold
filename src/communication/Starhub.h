@@ -81,33 +81,37 @@ class Starhub {
 
             // Serialize sensor data
             JsonObject sensorData = document["sensorData"].to<JsonObject>();
-            JsonArray acceleration = sensorData["acceleration"].to<JsonArray>();
-            JsonArray gyroscope = sensorData["gyroscope"].to<JsonArray>();
+            JsonArray acceleration = sensorData["accel_mps2"].to<JsonArray>();
+            JsonArray gyroscope = sensorData["gyro_radps"].to<JsonArray>();
             JsonArray magnetometer = sensorData["magnetometer"].to<JsonArray>();
 
-            acceleration.add(packet.sensorData.acceleration.x);
-            acceleration.add(packet.sensorData.acceleration.y);
-            acceleration.add(packet.sensorData.acceleration.z);
+            acceleration.add(packet.sensorData.accel_mps2.x);
+            acceleration.add(packet.sensorData.accel_mps2.y);
+            acceleration.add(packet.sensorData.accel_mps2.z);
 
-            gyroscope.add(packet.sensorData.gyroscope.x);
-            gyroscope.add(packet.sensorData.gyroscope.y);
-            gyroscope.add(packet.sensorData.gyroscope.z);
+            gyroscope.add(packet.sensorData.gyro_radps.x);
+            gyroscope.add(packet.sensorData.gyro_radps.y);
+            gyroscope.add(packet.sensorData.gyro_radps.z);
 
             magnetometer.add(packet.sensorData.magnetometer.x);
             magnetometer.add(packet.sensorData.magnetometer.y);
             magnetometer.add(packet.sensorData.magnetometer.z);
 
-            sensorData["distance"] = packet.sensorData.distance;
+            sensorData["distance_cm"] = packet.sensorData.distance_cm;
+            sensorData["lidarAvailable"] = packet.sensorData.lidarAvailable;
+            sensorData["voltage1_v"] = packet.sensorData.voltage1_v;
+            sensorData["voltage2_v"] = packet.sensorData.voltage2_v;
 
             // Serialize fusion data
             JsonObject fusionData = document["fusionData"].to<JsonObject>();
-            JsonArray orientation = fusionData["orientation"].to<JsonArray>();
+            JsonArray orientation = fusionData["orientation_deg"].to<JsonArray>();
 
-            orientation.add(packet.fusionData.orientation.x);
-            orientation.add(packet.fusionData.orientation.y);
-            orientation.add(packet.fusionData.orientation.z);
+            orientation.add(packet.fusionData.orientation_deg.x);
+            orientation.add(packet.fusionData.orientation_deg.y);
+            orientation.add(packet.fusionData.orientation_deg.z);
 
-            fusionData["altitude"] = packet.fusionData.altitude;
+            fusionData["altitude_mm"] = packet.fusionData.altitude_mm;
+            fusionData["underVoltage"] = packet.fusionData.underVoltage;
 
             // Notify packet
             String output;

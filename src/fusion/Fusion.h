@@ -35,7 +35,7 @@ class Fusion {
             // Altitude Kalman Filter
             double rocketAccelZ_mmps2 = getWorldAccelZ_mmps2(sensorData);
             kf.predict(rocketAccelZ_mmps2, dt_s);
-            if (sensorData.lidarAvaliable) kf.update(correctedDistance_mm);
+            if (sensorData.lidarAvailable) kf.update(correctedDistance_mm);
 
             fusionData.altitude_mm = kf.s.position;
             previousAltitude_mm = fusionData.altitude_mm;

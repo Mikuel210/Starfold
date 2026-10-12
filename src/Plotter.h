@@ -6,6 +6,12 @@
 
 class Plotter {
     public:
+        static void log(String message) {
+            #ifdef DEBUG
+            Serial.println(message);
+            #endif
+        }
+
         static void plot(String name, double number) {
             #ifdef DEBUG
             Serial.print(name);
