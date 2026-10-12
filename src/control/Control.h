@@ -1,27 +1,14 @@
 #pragma once
 #ifndef STARFOLD_CONTROL_H
 #define STARFOLD_CONTROL_H
+#include "../Globals.h"
 #include "../sensors/IDataProvider.h"
 #include "../hardware/IHardwareProvider.h"
 #include "../fusion/FusionData.h"
-#include "PID.h"
 #include "../Plotter.h"
+#include "PID.h"
 #include <algorithm>
 #include <Arduino.h>
-
-// TVC
-#define KP 2
-#define KI 0.25
-#define KD 5
-#define RKD 25
-
-// Altitude
-#define AKP 1
-#define AKI 0.25
-#define AKD 50
-
-#define MIN_THROTTLE 20.0
-#define MAX_THROTTLE 90.0
 
 class Control {
     public:

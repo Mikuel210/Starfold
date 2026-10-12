@@ -1,14 +1,11 @@
 #pragma once
 #ifndef STARFOLD_FLIGHTHARDWAREPROVIDER_H
 #define STARFOLD_FLIGHTHARDWAREPROVIDER_H
-#include "IHardwareProvider.h"
+#include "../Globals.h"
 #include "../Plotter.h"
+#include "IHardwareProvider.h"
 #include <ESP32Servo.h>
 #include <algorithm>
-
-// Parameters
-#define UNPOWERED_TVC
-#define UNPOWERED_ESC
 
 // Actuators
 #define TVC_LIMIT 45.0
@@ -16,20 +13,10 @@
 #define X_MINUS 25
 #define Y_PLUS 33
 #define Y_MINUS 32
-
 #define ESC 18
 #define LEG 4
 
 // State indication
-#define COUNDOWN_SECONDS 10
-#define COUNTDOWN_FREQUENCY 220
-#define COUNTDOWN_BEEP_SECONDS 0.5
-
-#define WIGGLE_T_MINUS 15
-#define WIGGLE_ANGLE 45
-#define WIGGLE_STEP 0.15
-#define WIGGLE_INTERVAL 0.5
-
 #define LED_R 2
 #define LED_G 19
 #define LED_B 23

@@ -1,6 +1,7 @@
 #pragma once
 #ifndef STARFOLD_PLOTTER_H
 #define STARFOLD_PLOTTER_H
+#include "Globals.h"
 #include <Arduino.h>
 
 class Plotter {

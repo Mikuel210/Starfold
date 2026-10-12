@@ -1,21 +1,9 @@
-// Globals
-#define HZ 50
-#define G 9.807
-#define DEBUG
-#undef SIMULATION
-
+#include "src/Globals.h"
+#include "src/communication/Starhub.h"
 #include "src/fusion/Fusion.h"
 #include "src/control/Control.h"
 #include "src/Plotter.h"
 #include "src/BMS.h"
-
-// Flight profile
-#define HOVER_ALTITUDE_MM 1000
-#define LANDING_ALTITUDE_MM 200
-#define HOVER_SECONDS 10
-#define THROTTLE_UP_SECONDS 1
-#define ABORT_THRESHOLD_DEG 40
-#define STARTUP_SECONDS 20
 
 // Instances
 #ifdef SIMULATION
@@ -49,7 +37,9 @@ void setup() {
     Serial.begin(115200);
     dataProvider.initialize();
     hardwareProvider.initialize();
+
     Control::initialize(dataProvider, hardwareProvider);
+    Starhub::initialize();
     BMS::initialize();
 }
 

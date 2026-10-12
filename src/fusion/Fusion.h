@@ -2,15 +2,12 @@
 #ifndef STARFOLD_FUSION_H
 #define STARFOLD_FUSION_H
 #include "../sensors/SensorData.h"
-#include "FusionData.h"
-#include "AltitudeKF.h"
+#include "../Globals.h"
 #include "../Vector3.h"
 #include "../Plotter.h"
+#include "FusionData.h"
+#include "AltitudeKF.h"
 #include <SensorFusion.h>
-
-#define LIDAR_ALPHA 0.2
-#define VOLTAGE_THRESHOLD_V 3.4
-#define G 9.807
 
 class Fusion {
     public:

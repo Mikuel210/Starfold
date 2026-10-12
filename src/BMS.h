@@ -1,16 +1,13 @@
 #pragma once
 #ifndef STARFOLD_BMS_H
 #define STARFOLD_BMS_H
+#include "Globals.h"
 #include "sensors/IDataProvider.h"
 #include "hardware/IHardwareProvider.h"
 #include "control/Control.h"
 #include "fusion/Fusion.h"
 #include "tasks/Task.h"
 #include "tasks/TaskArgs.h"
-
-// BMS parameters
-#define BMS_HZ 2.0
-#define DISABLE_BMS
 
 class BMS {
     public:

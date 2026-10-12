@@ -1,8 +1,9 @@
 #pragma once
 #ifndef STARFOLD_SENSORDATAPROVIDER_H
 #define STARFOLD_SENSORDATAPROVIDER_H
-#include "IDataProvider.h"
+#include "../Globals.h"
 #include "../Plotter.h"
+#include "IDataProvider.h"
 #include <Arduino.h>
 #include <Wire.h>
 #include <TFLI2C.h>
