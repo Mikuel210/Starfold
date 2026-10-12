@@ -1,9 +1,9 @@
 #pragma once
 #ifndef STARFOLD_DATAPACKET_H
 #define STARFOLD_DATAPACKET_H
-#include "src/State.h"
-#include "src/SensorData.h"
-#include "src/FusionData.h"
+#include "../sensors/SensorData.h"
+#include "../fusion/FusionData.h"
+#include "../State.h"
 
 struct DataPacket {
     State state;

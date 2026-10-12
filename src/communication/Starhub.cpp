@@ -1,5 +1,5 @@
 #pragma once
-#include "src/communication/Starhub.h"
+#include "Starhub.h"
 
 BLEServer* Starhub::server = NULL;
 BLECharacteristic* Starhub::commandCharacteristic = NULL;

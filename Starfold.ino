@@ -3,6 +3,7 @@
 #include "src/fusion/Fusion.h"
 #include "src/control/Control.h"
 #include "src/Plotter.h"
+#include "src/State.h"
 #include "src/BMS.h"
 
 // Instances
@@ -19,14 +20,6 @@
 #endif
 
 // State machine
-enum State {
-    IDLE,
-    STARTUP,
-    FLIGHT,
-    ABORT,
-    LANDED
-};
-
 enum State currentState = IDLE;
 unsigned long startupStartMillis;
 unsigned long flightStartMillis;

@@ -1,8 +1,8 @@
 #pragma once
 #ifndef STARFOLD_STARHUB_H
 #define STARFOLD_STARHUB_H
-#include "src/communication/DataPacket.h"
-#include "src/Plotter.h"
+#include "../Plotter.h"
+#include "DataPacket.h"
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
