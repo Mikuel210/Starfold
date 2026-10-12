@@ -28,16 +28,18 @@ double dt_s;
 // Entry point
 void setup() {
     Serial.begin(115200);
+    Starhub::initialize();
+
     dataProvider.initialize();
     hardwareProvider.initialize();
-
     Control::initialize(dataProvider, hardwareProvider);
-    Starhub::initialize();
     BMS::initialize();
 }
 
 void loop() {
     unsigned long usStart = micros();
+    SensorData sensorData = dataProvider.getData();
+    FusionData fusionData = Fusion::getData(sensorData, dt_s);
 
     switch (currentState) {
         case IDLE:
@@ -46,11 +48,18 @@ void loop() {
             // Reset state
             hardwareProvider.deployLegs(false);
             Control::shutdown();
-            delay(3000);
 
-            dataProvider.calibrate();
-            startupStartMillis = millis();
-            currentState = STARTUP;
+            if (Starhub::abortRequested) {
+                currentState = ABORT;
+                break;
+            }
+
+            if (Starhub::startupRequested) {
+                dataProvider.calibrate();
+                startupStartMillis = millis();
+                currentState = STARTUP;
+            }
+
             break;
 
         case STARTUP: {
@@ -61,9 +70,10 @@ void loop() {
             hardwareProvider.updateWiggle(timeLeft);
             hardwareProvider.updateCountdown(timeLeft);
 
-            // Stabilize angle
-            SensorData sensorData = dataProvider.getData();
-            FusionData fusionData = Fusion::getData(sensorData, dt_s);
+            if (Starhub::abortRequested) {
+                currentState = ABORT;
+                break;
+            }
 
             if (timeLeft <= 0) {
                 hardwareProvider.writeBuzzer(LOW);
@@ -89,8 +99,6 @@ void loop() {
             }
 
             // Update control system
-            SensorData sensorData = dataProvider.getData();
-            FusionData fusionData = Fusion::getData(sensorData, dt_s);
             Control::update(fusionData);
 
             // Check for landing
@@ -98,7 +106,9 @@ void loop() {
                 currentState = LANDED;
 
             // Check abort
-            if (abs(fusionData.orientation_deg.x) > ABORT_THRESHOLD_DEG || abs(fusionData.orientation_deg.y) > ABORT_THRESHOLD_DEG)
+            if (abs(fusionData.orientation_deg.x) > ABORT_THRESHOLD_DEG
+                || abs(fusionData.orientation_deg.y) > ABORT_THRESHOLD_DEG
+                || Starhub::abortRequested)
                 currentState = ABORT;
 
             break;
@@ -115,6 +125,11 @@ void loop() {
             break;
     }
 
+    // Starhub communication
+    Starhub::update();
+    Starhub::notifyPacket({currentState, sensorData, fusionData});
+
+    // Delay to run at HZ
     unsigned long usEnd = micros();
     long usDelay = 1'000'000.0 / HZ - (usEnd - usStart);
 

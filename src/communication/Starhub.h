@@ -16,6 +16,9 @@
 
 class Starhub {
     public:
+        static bool startupRequested;
+        static bool abortRequested;
+
         static void initialize() {
             BLEDevice::init("Starkit");
 
@@ -150,6 +153,13 @@ class Starhub {
 
                 Plotter::log("Received command: " + value);
 
+                // Interpret command
+                if (value == "S")
+                    startupRequested = true;
+                if (value == "A")
+                    abortRequested = true;
+                else
+                    Plotter::log("Unknown command: " + value);
             }
         };
 };

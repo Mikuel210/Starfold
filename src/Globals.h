@@ -1,8 +1,8 @@
 // Global parameters
 #define HZ 50
 #define G 9.807
-#define DEBUG
-#undef SIMULATION
+#undef DEBUG
+#define SIMULATION
 
 // Flight profile
 #define HOVER_ALTITUDE_MM 1000
