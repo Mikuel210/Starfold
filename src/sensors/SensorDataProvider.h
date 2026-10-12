@@ -1,6 +1,8 @@
 #pragma once
-#include "src/sensors/IDataProvider.h"
-#include "src/Plotter.h"
+#ifndef STARFOLD_SENSORDATAPROVIDER_H
+#define STARFOLD_SENSORDATAPROVIDER_H
+#include "IDataProvider.h"
+#include "../Plotter.h"
 #include <Arduino.h>
 #include <Wire.h>
 #include <TFLI2C.h>
@@ -113,3 +115,5 @@ class SensorDataProvider : public IDataProvider {
         int16_t tfDistance_cm;
         int16_t tfAddress = TFL_DEF_ADR;
 };
+
+#endif

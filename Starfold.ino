@@ -1,5 +1,3 @@
-#pragma once
-//
 // Globals
 #define HZ 50
 #define G 9.807

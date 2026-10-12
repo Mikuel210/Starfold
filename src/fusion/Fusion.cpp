@@ -1,5 +1,4 @@
-#pragma once
-#include "src/fusion/Fusion.h"
+#include "Fusion.h"
 
 double Fusion::deltat_s = 0;
 double Fusion::previousAltitude_mm = 0;

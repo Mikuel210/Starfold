@@ -1,6 +1,8 @@
 #pragma once
-#include "src/hardware/IHardwareProvider.h"
-#include "src/Plotter.h"
+#ifndef STARFOLD_FLIGHTHARDWAREPROVIDER_H
+#define STARFOLD_FLIGHTHARDWAREPROVIDER_H
+#include "IHardwareProvider.h"
+#include "../Plotter.h"
 #include <ESP32Servo.h>
 #include <algorithm>
 
@@ -87,12 +89,12 @@ class FlightHardwareProvider : public IHardwareProvider {
             if (timeLeftMillis > wiggleStart) return;
 
             // Wiggle sequence
-            if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 11'000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
+            if      (timeLeftMillis < wiggleStart - WIGGLE_STEP * 11'000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
             else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 10'000 - WIGGLE_INTERVAL * 1000) wiggleStep(-WIGGLE_ANGLE);
-            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 9000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
-            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 8000 - WIGGLE_INTERVAL * 1000) wiggleStep(WIGGLE_ANGLE);
-            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 7000 - WIGGLE_INTERVAL * 1000) wiggleStep(0);
-            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 6000 - WIGGLE_INTERVAL * 1000) wiggleStep(-WIGGLE_ANGLE);
+            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 9000   - WIGGLE_INTERVAL * 1000) wiggleStep(0);
+            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 8000   - WIGGLE_INTERVAL * 1000) wiggleStep(WIGGLE_ANGLE);
+            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 7000   - WIGGLE_INTERVAL * 1000) wiggleStep(0);
+            else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 6000   - WIGGLE_INTERVAL * 1000) wiggleStep(-WIGGLE_ANGLE);
 
             else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 6000) wiggleStep(0);
             else if (timeLeftMillis < wiggleStart - WIGGLE_STEP * 5000) wiggleStep(WIGGLE_ANGLE);
@@ -138,3 +140,5 @@ class FlightHardwareProvider : public IHardwareProvider {
             YMinus.write(90 + angle);
         }
 };
+
+#endif

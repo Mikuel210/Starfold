@@ -1,9 +1,11 @@
 #pragma once
-#include "src/sensors/IDataProvider.h"
-#include "src/hardware/IHardwareProvider.h"
-#include "src/fusion/FusionData.h"
-#include "src/control/PID.h"
-#include "src/Plotter.h"
+#ifndef STARFOLD_CONTROL_H
+#define STARFOLD_CONTROL_H
+#include "../sensors/IDataProvider.h"
+#include "../hardware/IHardwareProvider.h"
+#include "../fusion/FusionData.h"
+#include "PID.h"
+#include "../Plotter.h"
 #include <algorithm>
 #include <Arduino.h>
 
@@ -77,3 +79,5 @@ class Control {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
 };
+
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STARFOLD_TASK_H
+#define STARFOLD_TASK_H
 #include <Arduino.h>
 
 class Task {
@@ -31,3 +33,5 @@ class Task {
         const char* name;
         void (*function)(void*);
 };
+
+#endif

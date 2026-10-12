@@ -1,9 +1,11 @@
 #pragma once
-#include "src/sensors/SensorData.h"
-#include "src/fusion/FusionData.h"
-#include "src/fusion/AltitudeKF.h"
-#include "src/Vector3.h"
-#include "src/Plotter.h"
+#ifndef STARFOLD_FUSION_H
+#define STARFOLD_FUSION_H
+#include "../sensors/SensorData.h"
+#include "FusionData.h"
+#include "AltitudeKF.h"
+#include "../Vector3.h"
+#include "../Plotter.h"
 #include <SensorFusion.h>
 
 #define LIDAR_ALPHA 0.2
@@ -86,3 +88,5 @@ class Fusion {
             return (worldAccelZ_mps2 - G) * 1000 + 5;
         }
 };
+
+#endif

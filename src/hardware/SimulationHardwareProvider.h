@@ -1,8 +1,10 @@
 #pragma once
-#include "src/hardware/IHardwareProvider.h"
+#ifndef STARFOLD_SIMULATIONHARDWAREPROVIDER_H
+#define STARFOLD_SIMULATIONHARDWAREPROVIDER_H
+#include "IHardwareProvider.h"
 #include <cstdint>
 
-class FlightHardwareProvider : public IHardwareProvider {
+class SimulationHardwareProvider : public IHardwareProvider {
   public:
     void initialize() override {
       // connection already established by simulation data
@@ -26,6 +28,7 @@ class FlightHardwareProvider : public IHardwareProvider {
 
 
     void updateWiggle(unsigned long timeLeft_ms) override {
+
     }
 
     void updateCountdown(unsigned long timeLeft_ms) override {
@@ -46,3 +49,5 @@ class FlightHardwareProvider : public IHardwareProvider {
 
     }
 };
+
+#endif

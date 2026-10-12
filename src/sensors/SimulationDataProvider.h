@@ -1,5 +1,7 @@
 #pragma once
-#include "src/sensors/IDataProvider.h"
+#ifndef STARFOLD_SIMULATIONDATAPROVIDER_H
+#define STARFOLD_SIMULATIONDATAPROVIDER_H
+#include "IDataProvider.h"
 
 class SimulationDataProvider : public IDataProvider {
     public:
@@ -15,3 +17,5 @@ class SimulationDataProvider : public IDataProvider {
             return data;
         }
 };
+
+#endif

@@ -1,5 +1,7 @@
 #pragma once
-#include "src/Vector3.h"
+#ifndef STARFOLD_SENSORDATA_H
+#define STARFOLD_SENSORDATA_H
+#include "../Vector3.h"
 
 struct SensorData {
     Vector3 accel_mps2;
@@ -11,3 +13,5 @@ struct SensorData {
     double voltage1_v;
     double voltage2_v;
 };
+
+#endif

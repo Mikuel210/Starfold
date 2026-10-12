@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STARFOLD_ALTITUDEKF_H
+#define STARFOLD_ALTITUDEKF_H
 
 struct KFState {
     double position, velocity;
@@ -58,3 +60,5 @@ class AltitudeKF {
         double lidarNoise;
         double accelNoise;
 };
+
+#endif

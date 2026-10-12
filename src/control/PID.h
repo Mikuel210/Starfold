@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STARFOLD_PID_H
+#define STARFOLD_PID_H
 #include <Arduino.h>
 
 #define INTEGRAL_LIMIT 10.0f
@@ -38,3 +40,5 @@ class PID {
     private:
         double lastError, errorIntegral, previousMicros, previousOutput;
 };
+
+#endif

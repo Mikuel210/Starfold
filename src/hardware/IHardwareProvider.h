@@ -1,5 +1,7 @@
 #pragma once
-#include "src/Vector3.h"
+#ifndef STARFOLD_IHARDWAREPROVIDER_H
+#define STARFOLD_IHARDWAREPROVIDER_H
+#include "../Vector3.h"
 #include <Arduino.h>
 
 class IHardwareProvider {
@@ -17,3 +19,5 @@ class IHardwareProvider {
         virtual void lightLed(int r, int g, int b) {}
         virtual void writeBuzzer(uint8_t value) {}
 };
+
+#endif

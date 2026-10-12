@@ -1,10 +1,12 @@
 #pragma once
-#include "src/sensors/IDataProvider.h"
-#include "src/hardware/IHardwareProvider.h"
-#include "src/control/Control.h"
-#include "src/fusion/Fusion.h"
-#include "src/tasks/Task.h"
-#include "src/tasks/TaskArgs.h"
+#ifndef STARFOLD_BMS_H
+#define STARFOLD_BMS_H
+#include "sensors/IDataProvider.h"
+#include "hardware/IHardwareProvider.h"
+#include "control/Control.h"
+#include "fusion/Fusion.h"
+#include "tasks/Task.h"
+#include "tasks/TaskArgs.h"
 
 // BMS parameters
 #define BMS_HZ 2.0
@@ -43,3 +45,5 @@ class BMS {
             delete args;
         }
 };
+
+#endif

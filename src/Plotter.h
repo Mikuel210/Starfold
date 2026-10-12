@@ -1,4 +1,6 @@
 #pragma once
+#ifndef STARFOLD_PLOTTER_H
+#define STARFOLD_PLOTTER_H
 #include <Arduino.h>
 
 class Plotter {
@@ -25,3 +27,5 @@ class Plotter {
             #endif
         }
 };
+
+#endif
