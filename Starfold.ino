@@ -40,6 +40,7 @@ void loop() {
     unsigned long usStart = micros();
     SensorData sensorData = dataProvider.getData();
     FusionData fusionData = Fusion::getData(sensorData, dt_s);
+    ControlData controlData = ControlData();
 
     switch (currentState) {
         case IDLE:
@@ -47,7 +48,7 @@ void loop() {
 
             // Reset state
             hardwareProvider.deployLegs(false);
-            Control::shutdown();
+            controlData = Control::shutdown();
 
             if (Starhub::abortRequested) {
                 currentState = ABORT;
@@ -99,7 +100,7 @@ void loop() {
             }
 
             // Update control system
-            Control::update(fusionData);
+            controlData = Control::update(fusionData);
 
             // Check for landing
             if (elapsed > (THROTTLE_UP_SECONDS + HOVER_SECONDS) * 1000 && fusionData.altitude_mm <= LANDING_ALTITUDE_MM + 1)
@@ -116,12 +117,12 @@ void loop() {
 
         case ABORT:
             hardwareProvider.lightLed(255, 0, 0);
-            Control::shutdown();
+            controlData = Control::shutdown();
             break;
 
         case LANDED:
             hardwareProvider.lightLed(0, 255, 0);
-            Control::shutdown();
+            controlData = Control::shutdown();
             break;
     }
 

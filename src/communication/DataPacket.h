@@ -3,12 +3,14 @@
 #define STARFOLD_DATAPACKET_H
 #include "../sensors/SensorData.h"
 #include "../fusion/FusionData.h"
+#include "../control/ControlData.h"
 #include "../State.h"
 
 struct DataPacket {
     State state;
     SensorData sensorData;
     FusionData fusionData;
+    ControlData controlData;
 };
 
 #endif

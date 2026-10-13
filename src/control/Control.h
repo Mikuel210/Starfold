@@ -6,6 +6,7 @@
 #include "../hardware/IHardwareProvider.h"
 #include "../fusion/FusionData.h"
 #include "../Plotter.h"
+#include "ControlData.h"
 #include "PID.h"
 #include <algorithm>
 #include <Arduino.h>
@@ -24,24 +25,32 @@ class Control {
             altitudePID.setpoint = altitude;
         }
 
-        static void shutdown() {
+        static ControlData shutdown() {
             hardwareProvider->throttleMotors(0);
             hardwareProvider->applyCorrection(Vector3(0, 0, 0));
+            return ControlData();
         }
 
-        static void update(FusionData data) {
+        static ControlData update(FusionData data) {
+            ControlData controlData;
+
             // TVC
             Vector3 correction;
             correction.x = xPID.getCorrection(data.orientation_deg.x);
             correction.y = yPID.getCorrection(data.orientation_deg.y);
             correction.z = getRollRate(data.orientation_deg.z) * RKD;
+
             hardwareProvider->applyCorrection(correction);
+            controlData.correction_deg = correction;
 
             // Throttle
             double altitudeCorrection = altitudePID.getCorrection(data.altitude_mm);
             double throttlePercentage = dmap(altitudeCorrection, -1000, 1000, MIN_THROTTLE, MAX_THROTTLE);
             throttlePercentage = std::clamp(throttlePercentage, MIN_THROTTLE, MAX_THROTTLE);
+
             hardwareProvider->throttleMotors(throttlePercentage);
+            controlData.throttle_01 = throttlePercentage / 100.0;
+            return controlData;
         }
 
     private:

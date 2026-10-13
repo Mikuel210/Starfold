@@ -116,6 +116,16 @@ class Starhub {
             fusionData["altitude_mm"] = packet.fusionData.altitude_mm;
             fusionData["underVoltage"] = packet.fusionData.underVoltage;
 
+            // Serialize control data
+            JsonObject controlData = document["controlData"].to<JsonObject>();
+            JsonArray correction = controlData["correction_deg"].to<JsonArray>();
+
+            correction.add(packet.controlData.correction_deg.x);
+            correction.add(packet.controlData.correction_deg.y);
+            correction.add(packet.controlData.correction_deg.z);
+
+            controlData["throttle_01"] = packet.controlData.throttle_01;
+
             // Notify packet
             String output;
             serializeJson(document, output);
