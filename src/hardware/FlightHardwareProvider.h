@@ -53,9 +53,9 @@ class FlightHardwareProvider : public IHardwareProvider {
             #endif
         }
 
-        void throttleMotors(double throttlePercentage) override {
+        void throttleMotors(double throttle_01) override {
             #ifndef UNPOWERED_ESC
-            int microseconds = (int)(throttlePercentage * 10 + 1000);
+            int microseconds = (int)(throttle_01 * 1000 + 1000);
             microseconds = std::clamp(microseconds, 1000, 2000);
 
             Esc.writeMicroseconds(microseconds);

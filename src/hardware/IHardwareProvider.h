@@ -10,7 +10,7 @@ class IHardwareProvider {
         virtual void initialize() {}
 
         virtual void applyCorrection(Vector3 correction_deg) {}
-        virtual void throttleMotors(double throttlePercentage) {}
+        virtual void throttleMotors(double throttle_01) {}
         virtual void deployLegs(bool deploy = true) {}
 
         virtual void updateWiggle(unsigned long timeLeft_ms) {}

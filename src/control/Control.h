@@ -25,13 +25,7 @@ class Control {
             altitudePID.setpoint = altitude;
         }
 
-        static ControlData shutdown() {
-            hardwareProvider->throttleMotors(0);
-            hardwareProvider->applyCorrection(Vector3(0, 0, 0));
-            return ControlData();
-        }
-
-        static ControlData update(FusionData data) {
+        static ControlData getData() {
             ControlData controlData;
 
             // TVC
@@ -39,17 +33,27 @@ class Control {
             correction.x = xPID.getCorrection(data.orientation_deg.x);
             correction.y = yPID.getCorrection(data.orientation_deg.y);
             correction.z = getRollRate(data.orientation_deg.z) * RKD;
-
-            hardwareProvider->applyCorrection(correction);
             controlData.correction_deg = correction;
 
             // Throttle
             double altitudeCorrection = altitudePID.getCorrection(data.altitude_mm);
             double throttlePercentage = dmap(altitudeCorrection, -1000, 1000, MIN_THROTTLE, MAX_THROTTLE);
             throttlePercentage = std::clamp(throttlePercentage, MIN_THROTTLE, MAX_THROTTLE);
-
-            hardwareProvider->throttleMotors(throttlePercentage);
             controlData.throttle_01 = throttlePercentage / 100.0;
+
+            return controlData;
+        }
+
+        static ControlData shutdown() {
+            hardwareProvider->throttleMotors(0);
+            hardwareProvider->applyCorrection(Vector3(0, 0, 0));
+            return getData();
+        }
+
+        static ControlData update(FusionData data) {
+            ControlData controlData = getData();
+            hardwareProvider->applyCorrection(controlData.correction_deg);
+            hardwareProvider->throttleMotors(controlData.throttle_01);
             return controlData;
         }
 

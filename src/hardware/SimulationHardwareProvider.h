@@ -18,7 +18,7 @@ class SimulationHardwareProvider : public IHardwareProvider {
       // YMinus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
     }
 
-    void throttleMotors(double throttlePercentage) override {
+    void throttleMotors(double throttle_01) override {
 
     }
 

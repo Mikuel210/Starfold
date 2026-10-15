@@ -128,7 +128,7 @@ void loop() {
 
     // Starhub communication
     Starhub::update();
-    Starhub::notifyPacket({currentState, sensorData, fusionData});
+    Starhub::notifyPacket({currentState, sensorData, fusionData, controlData});
 
     // Delay to run at HZ
     unsigned long usEnd = micros();

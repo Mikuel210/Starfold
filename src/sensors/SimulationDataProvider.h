@@ -10,7 +10,9 @@ class SimulationDataProvider : public IDataProvider {
             // -> Remove #define DEBUG on plotter
         }
 
-        void calibrate() override {}
+        void calibrate() override {
+            delay(1000);
+        }
 
         SensorData getData() override {
             SensorData data;
