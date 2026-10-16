@@ -54,6 +54,7 @@ class Starhub {
             advertising->setMinPreferred(0x0);
 
             BLEDevice::startAdvertising();
+            BLEDevice::setMTU(517);
             Plotter::log("Advertising...");
         }
 
@@ -105,24 +106,66 @@ class Starhub {
             sensorData["voltage1_v"] = packet.sensorData.voltage1_v;
             sensorData["voltage2_v"] = packet.sensorData.voltage2_v;
 
+            // Serialize hardware data
+            JsonObject hardwareData = document["hardwareData"].to<JsonObject>();
+            JsonArray tvc = hardwareData["tvc_deg"].to<JsonArray>();
+
+            tvc.add(packet.hardwareData.tvc_deg[0]);
+            tvc.add(packet.hardwareData.tvc_deg[1]);
+            tvc.add(packet.hardwareData.tvc_deg[2]);
+            tvc.add(packet.hardwareData.tvc_deg[3]);
+
+            hardwareData["leg_deg"] = packet.hardwareData.leg_deg;
+            hardwareData["throttle_us"] = packet.hardwareData.throttle_us;
+
             // Serialize fusion data
             JsonObject fusionData = document["fusionData"].to<JsonObject>();
             JsonArray orientation = fusionData["orientation_deg"].to<JsonArray>();
+            JsonArray kfState = fusionData["altitudeKfState"].to<JsonArray>();
 
             orientation.add(packet.fusionData.orientation_deg.x);
             orientation.add(packet.fusionData.orientation_deg.y);
             orientation.add(packet.fusionData.orientation_deg.z);
 
+            kfState.add(packet.fusionData.altitudeKfState.position);
+            kfState.add(packet.fusionData.altitudeKfState.velocity);
+            kfState.add(packet.fusionData.altitudeKfState.P11);
+            kfState.add(packet.fusionData.altitudeKfState.P12);
+            kfState.add(packet.fusionData.altitudeKfState.P22);
+            kfState.add(packet.fusionData.altitudeKfState.Q11);
+            kfState.add(packet.fusionData.altitudeKfState.Q12);
+            kfState.add(packet.fusionData.altitudeKfState.Q22);
+
             fusionData["altitude_mm"] = packet.fusionData.altitude_mm;
             fusionData["underVoltage"] = packet.fusionData.underVoltage;
+            fusionData["correctedDistance_mm"] = packet.fusionData.correctedDistance_mm;
+            fusionData["rocketAccelZ_mmps2"] = packet.fusionData.rocketAccelZ_mmps2;
 
             // Serialize control data
             JsonObject controlData = document["controlData"].to<JsonObject>();
             JsonArray correction = controlData["correction_deg"].to<JsonArray>();
+            JsonArray xPid = controlData["xPid_deg"].to<JsonArray>();
+            JsonArray yPid = controlData["yPid_deg"].to<JsonArray>();
+            JsonArray altitudePid = controlData["altitudePid_mm"].to<JsonArray>();
 
             correction.add(packet.controlData.correction_deg.x);
             correction.add(packet.controlData.correction_deg.y);
             correction.add(packet.controlData.correction_deg.z);
+
+            xPid.add(packet.controlData.xPid_deg.p);
+            xPid.add(packet.controlData.xPid_deg.i);
+            xPid.add(packet.controlData.xPid_deg.d);
+            xPid.add(packet.controlData.xPid_deg.r);
+
+            yPid.add(packet.controlData.yPid_deg.p);
+            yPid.add(packet.controlData.yPid_deg.i);
+            yPid.add(packet.controlData.yPid_deg.d);
+            yPid.add(packet.controlData.yPid_deg.r);
+
+            altitudePid.add(packet.controlData.altitudePid_mm.p);
+            altitudePid.add(packet.controlData.altitudePid_mm.i);
+            altitudePid.add(packet.controlData.altitudePid_mm.d);
+            altitudePid.add(packet.controlData.altitudePid_mm.r);
 
             controlData["throttle_01"] = packet.controlData.throttle_01;
 

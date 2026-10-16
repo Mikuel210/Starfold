@@ -38,6 +38,9 @@ class Fusion {
             if (sensorData.lidarAvailable) kf.update(correctedDistance_mm);
 
             fusionData.altitude_mm = kf.s.position;
+            fusionData.correctedDistance_mm = correctedDistance_mm;
+            fusionData.rocketAccelZ_mmps2 = rocketAccelZ_mmps2;
+            fusionData.altitudeKfState = kf.s;
             previousAltitude_mm = fusionData.altitude_mm;
 
             // BMS

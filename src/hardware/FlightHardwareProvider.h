@@ -1,9 +1,10 @@
 #pragma once
 #ifndef STARFOLD_FLIGHTHARDWAREPROVIDER_H
 #define STARFOLD_FLIGHTHARDWAREPROVIDER_H
+#include "HardwareData.h"
+#include "IHardwareProvider.h"
 #include "../Globals.h"
 #include "../Plotter.h"
-#include "IHardwareProvider.h"
 #include <ESP32Servo.h>
 #include <algorithm>
 
@@ -24,6 +25,8 @@
 
 class FlightHardwareProvider : public IHardwareProvider {
     public:
+        HardwareData data;
+
         void initialize() override {
             pinMode(LED_R, OUTPUT);
             pinMode(LED_G, OUTPUT);
@@ -45,29 +48,45 @@ class FlightHardwareProvider : public IHardwareProvider {
         }
 
         void applyCorrection(Vector3 correction) override {
+            double xp = std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
+            double xm = std::clamp( correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
+            double yp = std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
+            double ym = std::clamp( correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
+
             #ifndef UNPOWERED_TVC
-            XPlus.write(std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-            XMinus.write(std::clamp(correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-            YPlus.write(std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
-            YMinus.write(std::clamp(correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT));
+            XPlus.write(xp);
+            XMinus.write(xm);
+            YPlus.write(yp);
+            YMinus.write(ym);
             #endif
+
+            data.tvc_deg[0] = xp;
+            data.tvc_deg[1] = xm;
+            data.tvc_deg[2] = yp;
+            data.tvc_deg[3] = ym;
         }
 
         void throttleMotors(double throttle_01) override {
-            #ifndef UNPOWERED_ESC
             int microseconds = (int)(throttle_01 * 1000 + 1000);
             microseconds = std::clamp(microseconds, 1000, 2000);
 
+            #ifndef UNPOWERED_ESC
             Esc.writeMicroseconds(microseconds);
             #else
             Esc.writeMicroseconds(1000);
             #endif
+
+            data.throttle_us = microseconds;
         }
 
         void deployLegs(bool deploy = true) override {
+            int degrees = deploy ? 0 : 90;
+
             #ifndef UNPOWERED_ESC
-            Leg.write(deploy ? 0 : 90);
+            Leg.write(degrees);
             #endif
+
+            data.leg_deg = degrees;
         }
 
         void updateWiggle(unsigned long timeLeftMillis) override {
@@ -121,10 +140,7 @@ class FlightHardwareProvider : public IHardwareProvider {
         Servo Leg;
 
         void wiggleStep(int angle) {
-            XPlus.write(90 + angle);
-            XMinus.write(90 + angle);
-            YPlus.write(90 + angle);
-            YMinus.write(90 + angle);
+            applyCorrection({ 0, 0, angle });
         }
 };
 

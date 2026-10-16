@@ -4,6 +4,10 @@
 #include "../Globals.h"
 #include <Arduino.h>
 
+struct PIDData {
+    double p, i, d, r;
+};
+
 class PID {
     public:
         double Kp, Ki, Kd, setpoint, alpha;
@@ -11,7 +15,7 @@ class PID {
         PID(double Kp_, double Ki_, double Kd_, double setpoint_ = 0, double alpha_ = 1)
             : Kp(Kp_), Ki(Ki_), Kd(Kd_), setpoint(setpoint_), alpha(alpha_) {}
 
-        double getCorrection(double input) {
+        PIDData getData(double input) {
             unsigned long currentMicros = micros();
             unsigned long elapsedMicros = currentMicros - previousMicros;
 
@@ -36,7 +40,7 @@ class PID {
             lastError = error;
             previousMicros = currentMicros;
 
-            return output;
+            return { Kp * error, Ki * errorIntegral, Kd * errorRate, output };
         }
 
     private:

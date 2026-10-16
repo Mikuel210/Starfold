@@ -48,7 +48,7 @@ void loop() {
 
             // Reset state
             hardwareProvider.deployLegs(false);
-            controlData = Control::shutdown();
+            controlData = Control::shutdown(fusionData);
 
             if (Starhub::abortRequested) {
                 currentState = ABORT;
@@ -117,18 +117,18 @@ void loop() {
 
         case ABORT:
             hardwareProvider.lightLed(255, 0, 0);
-            controlData = Control::shutdown();
+            controlData = Control::shutdown(fusionData);
             break;
 
         case LANDED:
             hardwareProvider.lightLed(0, 255, 0);
-            controlData = Control::shutdown();
+            controlData = Control::shutdown(fusionData);
             break;
     }
 
     // Starhub communication
     Starhub::update();
-    Starhub::notifyPacket({currentState, sensorData, fusionData, controlData});
+    Starhub::notifyPacket({currentState, sensorData, hardwareProvider.data, fusionData, controlData});
 
     // Delay to run at HZ
     unsigned long usEnd = micros();

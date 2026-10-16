@@ -25,33 +25,36 @@ class Control {
             altitudePID.setpoint = altitude;
         }
 
-        static ControlData getData() {
+        static ControlData getData(FusionData data) {
             ControlData controlData;
 
             // TVC
-            Vector3 correction;
-            correction.x = xPID.getCorrection(data.orientation_deg.x);
-            correction.y = yPID.getCorrection(data.orientation_deg.y);
-            correction.z = getRollRate(data.orientation_deg.z) * RKD;
-            controlData.correction_deg = correction;
+            PIDData xData = xPID.getData(data.orientation_deg.x);
+            PIDData yData = xPID.getData(data.orientation_deg.y);
+            double zRate = getRollRate(data.orientation_deg.z) * RKD;
+
+            controlData.xPid_deg = xData;
+            controlData.yPid_deg = yData;
+            controlData.correction_deg = { xData.r, yData.r, zRate };
 
             // Throttle
-            double altitudeCorrection = altitudePID.getCorrection(data.altitude_mm);
-            double throttlePercentage = dmap(altitudeCorrection, -1000, 1000, MIN_THROTTLE, MAX_THROTTLE);
+            PIDData altitudeData = altitudePID.getData(data.altitude_mm);
+            double throttlePercentage = dmap(altitudeData.r, -1000, 1000, MIN_THROTTLE, MAX_THROTTLE);
             throttlePercentage = std::clamp(throttlePercentage, MIN_THROTTLE, MAX_THROTTLE);
-            controlData.throttle_01 = throttlePercentage / 100.0;
 
+            controlData.altitudePid_mm = altitudeData;
+            controlData.throttle_01 = throttlePercentage / 100.0;
             return controlData;
         }
 
-        static ControlData shutdown() {
+        static ControlData shutdown(FusionData data) {
             hardwareProvider->throttleMotors(0);
             hardwareProvider->applyCorrection(Vector3(0, 0, 0));
-            return getData();
+            return getData(data);
         }
 
         static ControlData update(FusionData data) {
-            ControlData controlData = getData();
+            ControlData controlData = getData(data);
             hardwareProvider->applyCorrection(controlData.correction_deg);
             hardwareProvider->throttleMotors(controlData.throttle_01);
             return controlData;
