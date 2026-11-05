@@ -7,7 +7,6 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-#include <ArduinoJson.h>
 
 // Parameters
 #define SERVICE_UUID "3343f2ee-4910-492a-b29b-181e051a631b"
@@ -79,101 +78,13 @@ class Starhub {
         static void notifyPacket(DataPacket packet)
         {
             if (!connected) return;
+            PacketBytes bytes = serializePacket(packet);
 
-            JsonDocument document;
-            document["state"] = static_cast<int>(packet.state);
+            telemetryCharacteristic->setValue(
+                reinterpret_cast<uint8_t*>(&bytes),
+                sizeof(bytes)
+            );
 
-            // Serialize sensor data
-            JsonObject sensorData = document["sensorData"].to<JsonObject>();
-            JsonArray acceleration = sensorData["accel_mps2"].to<JsonArray>();
-            JsonArray gyroscope = sensorData["gyro_radps"].to<JsonArray>();
-            JsonArray magnetometer = sensorData["magnetometer"].to<JsonArray>();
-
-            acceleration.add(packet.sensorData.accel_mps2.x);
-            acceleration.add(packet.sensorData.accel_mps2.y);
-            acceleration.add(packet.sensorData.accel_mps2.z);
-
-            gyroscope.add(packet.sensorData.gyro_radps.x);
-            gyroscope.add(packet.sensorData.gyro_radps.y);
-            gyroscope.add(packet.sensorData.gyro_radps.z);
-
-            magnetometer.add(packet.sensorData.magnetometer.x);
-            magnetometer.add(packet.sensorData.magnetometer.y);
-            magnetometer.add(packet.sensorData.magnetometer.z);
-
-            sensorData["distance_cm"] = packet.sensorData.distance_cm;
-            sensorData["lidarAvailable"] = packet.sensorData.lidarAvailable;
-            sensorData["voltage1_v"] = packet.sensorData.voltage1_v;
-            sensorData["voltage2_v"] = packet.sensorData.voltage2_v;
-
-            // Serialize hardware data
-            JsonObject hardwareData = document["hardwareData"].to<JsonObject>();
-            JsonArray tvc = hardwareData["tvc_deg"].to<JsonArray>();
-
-            tvc.add(packet.hardwareData.tvc_deg[0]);
-            tvc.add(packet.hardwareData.tvc_deg[1]);
-            tvc.add(packet.hardwareData.tvc_deg[2]);
-            tvc.add(packet.hardwareData.tvc_deg[3]);
-
-            hardwareData["leg_deg"] = packet.hardwareData.leg_deg;
-            hardwareData["throttle_us"] = packet.hardwareData.throttle_us;
-
-            // Serialize fusion data
-            JsonObject fusionData = document["fusionData"].to<JsonObject>();
-            JsonArray orientation = fusionData["orientation_deg"].to<JsonArray>();
-            JsonArray kfState = fusionData["altitudeKfState"].to<JsonArray>();
-
-            orientation.add(packet.fusionData.orientation_deg.x);
-            orientation.add(packet.fusionData.orientation_deg.y);
-            orientation.add(packet.fusionData.orientation_deg.z);
-
-            kfState.add(packet.fusionData.altitudeKfState.position);
-            kfState.add(packet.fusionData.altitudeKfState.velocity);
-            kfState.add(packet.fusionData.altitudeKfState.P11);
-            kfState.add(packet.fusionData.altitudeKfState.P12);
-            kfState.add(packet.fusionData.altitudeKfState.P22);
-            kfState.add(packet.fusionData.altitudeKfState.Q11);
-            kfState.add(packet.fusionData.altitudeKfState.Q12);
-            kfState.add(packet.fusionData.altitudeKfState.Q22);
-
-            fusionData["altitude_mm"] = packet.fusionData.altitude_mm;
-            fusionData["underVoltage"] = packet.fusionData.underVoltage;
-            fusionData["correctedDistance_mm"] = packet.fusionData.correctedDistance_mm;
-            fusionData["rocketAccelZ_mmps2"] = packet.fusionData.rocketAccelZ_mmps2;
-
-            // Serialize control data
-            JsonObject controlData = document["controlData"].to<JsonObject>();
-            JsonArray correction = controlData["correction_deg"].to<JsonArray>();
-            JsonArray xPid = controlData["xPid_deg"].to<JsonArray>();
-            JsonArray yPid = controlData["yPid_deg"].to<JsonArray>();
-            JsonArray altitudePid = controlData["altitudePid_mm"].to<JsonArray>();
-
-            correction.add(packet.controlData.correction_deg.x);
-            correction.add(packet.controlData.correction_deg.y);
-            correction.add(packet.controlData.correction_deg.z);
-
-            xPid.add(packet.controlData.xPid_deg.p);
-            xPid.add(packet.controlData.xPid_deg.i);
-            xPid.add(packet.controlData.xPid_deg.d);
-            xPid.add(packet.controlData.xPid_deg.r);
-
-            yPid.add(packet.controlData.yPid_deg.p);
-            yPid.add(packet.controlData.yPid_deg.i);
-            yPid.add(packet.controlData.yPid_deg.d);
-            yPid.add(packet.controlData.yPid_deg.r);
-
-            altitudePid.add(packet.controlData.altitudePid_mm.p);
-            altitudePid.add(packet.controlData.altitudePid_mm.i);
-            altitudePid.add(packet.controlData.altitudePid_mm.d);
-            altitudePid.add(packet.controlData.altitudePid_mm.r);
-
-            controlData["throttle_01"] = packet.controlData.throttle_01;
-
-            // Notify packet
-            String output;
-            serializeJson(document, output);
-
-            telemetryCharacteristic->setValue(output);
             telemetryCharacteristic->notify();
         }
 
@@ -215,6 +126,80 @@ class Starhub {
                     Plotter::log("Unknown command: " + value);
             }
         };
+
+        static PacketBytes serializePacket(const DataPacket& data) {
+            const auto vector = [](const Vector3& v) -> VectorBytes {
+                return {
+                    static_cast<float>(v.x),
+                    static_cast<float>(v.y),
+                    static_cast<float>(v.z)
+                };
+            };
+
+            const auto pid = [](const PIDData& p) -> PIDBytes {
+                return {
+                    static_cast<float>(p.p),
+                    static_cast<float>(p.i),
+                    static_cast<float>(p.d),
+                    static_cast<float>(p.r),
+                    static_cast<float>(p.s)
+                };
+            };
+
+            // Initialize packet
+            PacketBytes bytes = {};
+            bytes.state = static_cast<uint8_t>(data.state);
+            bytes.flags = (data.sensorData.lidarAvailable ? 0x01 : 0x00) | (data.fusionData.underVoltage ? 0x02 : 0x00);
+
+            // Sensor data
+            const auto& sensorData = data.sensorData;
+            bytes.accel_mps2   = vector(sensorData.accel_mps2);
+            bytes.gyro_radps   = vector(sensorData.gyro_radps);
+            bytes.magnetometer = vector(sensorData.magnetometer);
+            bytes.distance_cm  = static_cast<float>(sensorData.distance_cm);
+            bytes.voltage1_v   = static_cast<float>(sensorData.voltage1_v);
+            bytes.voltage2_v   = static_cast<float>(sensorData.voltage2_v);
+
+            // Hardware data
+            const auto& hardwareData = data.hardwareData;
+
+            for (unsigned i = 0; i < 4; ++i) {
+                bytes.tvc_deg[i] = static_cast<float>(hardwareData.tvc_deg[i]);
+            }
+
+            bytes.leg_deg = static_cast<float>(hardwareData.leg_deg);
+            bytes.throttle_us = static_cast<int32_t>(hardwareData.throttle_us);
+
+            // Fusion data
+            const auto& fusionData = data.fusionData;
+            bytes.orientation_deg = vector(fusionData.orientation_deg);
+            bytes.altitude_mm = static_cast<float>(fusionData.altitude_mm);
+            bytes.correctedDistance_mm = static_cast<float>(fusionData.correctedDistance_mm);
+            bytes.rocketAccelZ_mmps2 = static_cast<float>(fusionData.rocketAccelZ_mmps2);
+
+            const auto& kfState = fusionData.altitudeKfState;
+
+            bytes.altitudeKfState = {
+                static_cast<float>(kfState.position),
+                static_cast<float>(kfState.velocity),
+                static_cast<float>(kfState.P11),
+                static_cast<float>(kfState.P12),
+                static_cast<float>(kfState.P22),
+                static_cast<float>(kfState.Q11),
+                static_cast<float>(kfState.Q12),
+                static_cast<float>(kfState.Q22)
+            };
+
+            // Control data
+            const auto& controlData = data.controlData;
+            bytes.correction_deg = vector(controlData.correction_deg);
+            bytes.throttle_01    = static_cast<float>(controlData.throttle_01);
+            bytes.xPid_deg       = pid(controlData.xPid_deg);
+            bytes.yPid_deg       = pid(controlData.yPid_deg);
+            bytes.altitudePid_mm = pid(controlData.altitudePid_mm);
+
+            return bytes;
+        }
 };
 
 #endif

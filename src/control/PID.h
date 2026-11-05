@@ -5,7 +5,7 @@
 #include <Arduino.h>
 
 struct PIDData {
-    double p, i, d, r;
+    double p, i, d, r, s; // s: setpoint at the time of this sample
 };
 
 class PID {
@@ -40,7 +40,7 @@ class PID {
             lastError = error;
             previousMicros = currentMicros;
 
-            return { Kp * error, Ki * errorIntegral, Kd * errorRate, output };
+            return { Kp * error, Ki * errorIntegral, Kd * errorRate, output, setpoint };
         }
 
     private:
