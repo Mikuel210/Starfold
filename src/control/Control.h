@@ -30,7 +30,7 @@ class Control {
 
             // TVC
             PIDData xData = xPID.getData(data.orientation_deg.x);
-            PIDData yData = xPID.getData(data.orientation_deg.y);
+            PIDData yData = yPID.getData(data.orientation_deg.y);
             double zRate = getRollRate(data.orientation_deg.z) * RKD;
 
             controlData.xPid_deg = xData;

@@ -51,7 +51,7 @@ class FlightHardwareProvider : public IHardwareProvider {
             double xp = std::clamp(-correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
             double xm = std::clamp( correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
             double yp = std::clamp(-correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
-            double ym = std::clamp( correction.x + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
+            double ym = std::clamp( correction.y + correction.z + 90, 90 - TVC_LIMIT, 90 + TVC_LIMIT);
 
             #ifndef UNPOWERED_TVC
             XPlus.write(xp);
